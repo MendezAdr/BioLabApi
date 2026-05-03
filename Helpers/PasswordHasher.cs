@@ -1,0 +1,18 @@
+﻿using System;
+using BCrypt.Net;
+
+namespace BioLabProject.Helpers;
+
+public static class PasswordHasher
+{
+	public static string PasswordHash(string password)
+	{
+		return BCrypt.Net.BCrypt.HashPassword(password);
+	}
+
+	public static bool VerifyPassword(string password, string hashedPassword)
+	{
+
+		return BCrypt.Net.BCrypt.Verify(password, hashedPassword);
+	}
+}
