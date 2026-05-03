@@ -1,5 +1,6 @@
-using BioLabProject.Models;
+using System;
 
+namespace BioLabApi.Models;
 public class DetalleModel
 { /*
    * el detalle es la relacion entre una orden y un examen especifico,

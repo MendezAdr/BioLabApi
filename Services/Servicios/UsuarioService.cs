@@ -1,15 +1,15 @@
 using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using BioLabProject.Models;
-using BioLabProject.Services;
-using BioLabProject.Data;
-using BioLabProject.Helpers;
+using BioLabApi.Models;
+using BioLabApi.Services;
+using BioLabApi.Data;
+using BioLabApi.Helpers;
 using Microsoft.Extensions.DependencyInjection;
-using BioLabProject.Services.Interfaces;
+using BioLabApi.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace BioLabProject.Services.Servicios;
+namespace BioLabApi.Services.Servicios;
 
 public class UsuarioService : IUsuarioService
 {

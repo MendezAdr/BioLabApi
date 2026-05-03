@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace BioLabProject.Models;
+namespace BioLabApi.Models;
 
 public class RolModel
 {

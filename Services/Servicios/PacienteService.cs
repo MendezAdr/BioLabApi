@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BioLabProject.Models;
-using BioLabProject.Services.Interfaces;
-using BioLabProject.Data;
+using BioLabApi.Models;
+using BioLabApi.Services.Interfaces;
+using BioLabApi.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace BioLabProject.Services.Servicios;
+namespace BioLabApi.Services.Servicios;
 
 public class PacienteService : IPacientesService
 {   

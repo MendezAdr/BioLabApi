@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BioLabProject.Models;
-using BioLabProject.Services.Interfaces;
+using BioLabApi.Models;
+using BioLabApi.Services.Interfaces;
 
-namespace BioLabProject.Services.Interfaces;
+namespace BioLabApi.Services.Interfaces;
 
 public interface IExamenesService
 {

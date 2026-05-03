@@ -1,8 +1,8 @@
 // modelo de usuario
-using BioLabProject.Models;
+using BioLabApi.Models;
 using System;
 
-namespace BioLabProject.Models;
+namespace BioLabApi.Models;
 public class UsuarioModel
 {
     public int Id { get; set; }

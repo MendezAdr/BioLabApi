@@ -1,11 +1,11 @@
 using System;
-using BioLabProject.Models;
-using BioLabProject.Helpers;
+using BioLabApi.Models;
+using BioLabApi.Helpers;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
 
-namespace BioLabProject.Data;
+namespace BioLabApi.Data;
 
 public class AppDbContext : DbContext
 {

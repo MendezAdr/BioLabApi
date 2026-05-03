@@ -1,7 +1,7 @@
 ﻿using System;
 using BCrypt.Net;
 
-namespace BioLabProject.Helpers;
+namespace BioLabApi.Helpers;
 
 public static class PasswordHasher
 {

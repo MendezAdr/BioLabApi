@@ -1,6 +1,6 @@
 using System;
 
-namespace BioLabProject.Models;
+namespace BioLabApi.Models;
 
 public class ExamenModel
 {

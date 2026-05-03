@@ -1,9 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using BioLabProject.Models;
+using BioLabApi.Models;
 
-namespace BioLabProject.Services.Interfaces;
+namespace BioLabApi.Services.Interfaces;
 
 public interface IOrdenesService
 {

@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BioLabProject.Models;
-using BioLabProject.Data;
-using BioLabProject.Services.Interfaces;
+using BioLabApi.Models;
+using BioLabApi.Data;
+using BioLabApi.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
-namespace BioLabProject.Services.Servicios;
+namespace BioLabApi.Services.Servicios;
 
 public class OrdenesService : IOrdenesService
 {

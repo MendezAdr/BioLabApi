@@ -1,4 +1,4 @@
-using BioLabProject.Models;
+using BioLabApi.Models;
 
 public class PagosModel
 {
