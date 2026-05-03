@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BioLabApi.Services.Servicios;
 
-public class ExamenesService
+public class ExamenesService : IExamenesService
 {   
 
     private readonly AppDbContext _appDbContext;

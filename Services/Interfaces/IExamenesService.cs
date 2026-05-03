@@ -6,7 +6,7 @@ using BioLabApi.Services.Interfaces;
 
 namespace BioLabApi.Services.Interfaces;
 
-public interface IExamenesService
+public interface IExamenesService 
 {
     Task<ListOperationResult<ExamenModel>> GetExamenesAsync();
     Task<ObjectOperationResult> GetExamenByIdAsync(int id);

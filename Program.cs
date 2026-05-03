@@ -1,6 +1,6 @@
-using BioLabProject.Data;
-using BioLabProject.Services.Interfaces;
-using BioLabProject.Services.Servicios;
+using BioLabApi.Data;
+using BioLabApi.Services.Interfaces;
+using BioLabApi.Services.Servicios;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);

@@ -2,7 +2,7 @@ using  BioLabApi.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-namespace BioLabProject.Services.Interfaces;
+namespace BioLabApi.Services.Interfaces;
 
 public interface IDetalleService
 {

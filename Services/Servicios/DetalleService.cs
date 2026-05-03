@@ -75,14 +75,14 @@ private readonly AppDbContext _context;
                 .FirstOrDefaultAsync(d => d.ExamenId == Eid);
 
 
-            if (DetalleList == null) return new ListOperationResult<DetalleModel>(false, "No existe ningun detalle asociado a ese Examen", null);
+            if (DetalleList == null) return new ObjectOperationResult(false, "No existe ningun detalle asociado a ese Examen", null);
 
-            return new ListOperationResult<DetalleModel>(true, "", DetalleList);
+            return new ObjectOperationResult(true, "", DetalleList);
 
         }
         catch (Exception ex)
         {
-            return new ListOperationResult<DetalleModel>(false, $"Error: {ex.Message}", null);
+            return new ObjectOperationResult(false, $"Error: {ex.Message}", null);
 
         } 
     }
@@ -139,7 +139,7 @@ private readonly AppDbContext _context;
         if (detalle == null) return new OperationResult(false, "El detalle no puede ser nulo");
         if (detalle.OrdenId <= 0) return new OperationResult(false, "El Id de la orden debe ser mayor a 0");
         if (detalle.ExamenId <= 0) return new OperationResult(false, "El Id del examen debe ser mayor a 0");
-        if (detalle.Precio < 0) return new OperationResult(false, "El precio no puede ser negativo");
+        if (detalle.PrecioMomentoDivisa < 0) return new OperationResult(false, "El precio no puede ser negativo");
         return new OperationResult(true, "");
     }
 
