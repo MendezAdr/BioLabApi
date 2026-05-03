@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using BioLabApi.Models;
+using BioLabAPI.Helpers;
 
 namespace BioLabApi.Services.Interfaces;
 

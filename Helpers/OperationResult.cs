@@ -1,8 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using BioLabApi.Models;
 
-namespace BioLabApi.Models;
+namespace BioLabApi.Helpers;
 
 public record OperationResult(bool Success, string? Message);
 

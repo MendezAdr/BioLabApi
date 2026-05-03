@@ -8,6 +8,7 @@ using BioLabApi.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using BioLabApi.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using BioLabApi.Helpers;
 
 namespace BioLabApi.Services.Servicios;
 
@@ -121,7 +122,7 @@ public class UsuarioService : IUsuarioService
     // crear usuario
     public async Task<OperationResult?> CreateUsuarioAsync(UsuarioModel usuario, int AdminId)
     {
-        var validationResult = ValidateInputUserData(usuario);
+        var validationResult = ValidateInputUserData(usuario, true);
         if (!validationResult.Success) return validationResult;
 
         bool validateExistence = await _context.Usuarios.AnyAsync(u => u.Username == usuario.Username);
@@ -146,18 +147,23 @@ public class UsuarioService : IUsuarioService
             .Include(u => u.Rol)
             .FirstOrDefaultAsync(u => u.Id == adminId);
 		
-        bool validateExistence = await _context.Usuarios.AnyAsync(u => u.Id == usuario.Id);
+        var userDb = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == usuario.Id);
         var validationResult = ValidateInputUserData(usuario);
         var validatePermisos = ValidatePermisos(adminValidate);
 
 
         if (!validationResult.Success) return validationResult;
-        if (!validateExistence) return new OperationResult  (false,  "El usuario que intenta editar no existe." );
+        if (userDb == null) return new OperationResult  (false,  "El usuario que intenta editar no existe." );
         if (!validatePermisos.Success) return validatePermisos;
 
         try
         {
-            _context.Usuarios.Update(usuario);
+            userDb.Nombre = usuario.Nombre;
+            userDb.Apellido = usuario.Apellido;
+            userDb.Username = usuario.Username;
+            userDb.RolId = usuario.RolId;
+            userDb.Cedula = usuario.Cedula;
+
             await _context.SaveChangesAsync();
             return new OperationResult(true, "Usuario actualizado con éxito.");
 
@@ -266,7 +272,7 @@ public class UsuarioService : IUsuarioService
     
     //Metodos de uso multiple:
     
-    public OperationResult ValidateInputUserData(UsuarioModel user)
+    public OperationResult ValidateInputUserData(UsuarioModel user, bool isNewUser = false)
     {
         if (string.IsNullOrWhiteSpace(user.Nombre))
         {
@@ -279,17 +285,14 @@ public class UsuarioService : IUsuarioService
             return new OperationResult(false, "El nombre de usuario no puede estar vacío.");
         }
 
-
-        if (string.IsNullOrWhiteSpace(user.Contrasena))
-        {
-            return new OperationResult(false, "La contraseña no puede estar vacía.");
-        }
-
+        if (isNewUser && string.IsNullOrWhiteSpace(user.Contrasena))
+            return new OperationResult(false, "La contraseña es obligatoria para nuevos usuarios.");
 
         if (user.RolId <= 0)
         {
             return new OperationResult(false, "Debe asignar un rol válido al usuario.");
         }
+
 
         return new OperationResult ( true, " "  );
 

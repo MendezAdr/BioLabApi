@@ -30,9 +30,9 @@ public class OrdenesModel
     // 2. Una Orden tiene muchos Pagos (Multimoneda/Multitotal)
     public List<PagosModel> Pagos { get; set; } = new();
 
-    public EstadoPago estado { get; set; } // Pagado, Parcial, Pendiente
+    public EstadoPago Estado { get; set; } // Pagado, Parcial, Pendiente
 
-    [Flags]
+    
     public enum EstadoPago
     {
         Pagado = 1,
