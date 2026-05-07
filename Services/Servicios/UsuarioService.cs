@@ -2,13 +2,12 @@ using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using BioLabApi.Models;
-using BioLabApi.Services;
 using BioLabApi.Data;
 using BioLabApi.Helpers;
 using Microsoft.Extensions.DependencyInjection;
 using BioLabApi.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using BioLabApi.Helpers;
+
 
 namespace BioLabApi.Services.Servicios;
 
@@ -121,7 +120,7 @@ public class UsuarioService : IUsuarioService
 
     // crear usuario
     public async Task<OperationResult?> CreateUsuarioAsync(UsuarioModel usuario, int AdminId)
-    {
+    {;
         var validationResult = ValidateInputUserData(usuario, true);
         if (!validationResult.Success) return validationResult;
 
@@ -130,6 +129,10 @@ public class UsuarioService : IUsuarioService
 
         try
         {
+            usuario.FechaCreacion = DateTime.Now;
+            usuario.CreadoPorId = AdminId;
+            usuario.ModificadoPorId = AdminId;
+
             _context.Usuarios.AddAsync(usuario);
             await _context.SaveChangesAsync();
             return new OperationResult(true, "Usuario creado con éxito.");
@@ -163,6 +166,10 @@ public class UsuarioService : IUsuarioService
             userDb.Username = usuario.Username;
             userDb.RolId = usuario.RolId;
             userDb.Cedula = usuario.Cedula;
+
+            userDb.FechaCreacion = DateTime.Now;
+            userDb.CreadoPorId = adminId;
+            userDb.ModificadoPorId = adminId;
 
             await _context.SaveChangesAsync();
             return new OperationResult(true, "Usuario actualizado con éxito.");
@@ -199,10 +206,13 @@ public class UsuarioService : IUsuarioService
         {
             // En lugar de _context.Remove(usuario), cambiamos un estado
             usuario.IsActive = false;
-        
+            usuario.FechaCreacion = DateTime.Now;
+            usuario.CreadoPorId = adminId;
+            usuario.ModificadoPorId = adminId;
+
             // Si DE VERDAD quieres borrarlo físicamente (no recomendado):
             //_context.Usuarios.Remove(usuario);
-        
+
             await _context.SaveChangesAsync();
             return new OperationResult(true, "Usuario procesado con éxito.");
         }
@@ -230,6 +240,9 @@ public class UsuarioService : IUsuarioService
 
         try
         {
+            usuario.FechaCreacion = DateTime.Now;
+            usuario.CreadoPorId = adminId;
+            usuario.ModificadoPorId = adminId;
             usuario.IsActive = true;
             await _context.SaveChangesAsync();
             return new OperationResult(true, "Usuario procesado con éxito.");
