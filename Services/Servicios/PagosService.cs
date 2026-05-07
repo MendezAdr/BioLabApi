@@ -6,7 +6,7 @@ using BioLabApi.Models;
 using BioLabApi.Services.Interfaces;
 using BioLabApi.Data;
 using Microsoft.EntityFrameworkCore;
-using BioLabAPI.Helpers;
+using BioLabApi.Helpers;
 
 
 namespace BioLabApi.Services.Servicios;
