@@ -73,12 +73,19 @@ public class OrdenesService : IOrdenesService
         }
     }
 
-    public async Task<OperationResult> CreateOrdenAsync(OrdenesModel orden)
+    public async Task<OperationResult> CreateOrdenAsync(OrdenesModel orden, int UsuarioActualId)
     {
         using var transaction = await _context.Database.BeginTransactionAsync();
 
         try
         {
+            orden.CreadoPorId = UsuarioActualId; // Aseguramos que el ID del usuario esté asignado correctamente
+            orden.ModificadoPorId = UsuarioActualId;
+            orden.FechaModificacion = DateTime.Now;
+
+            if (orden.Fecha == default) orden.Fecha = DateTime.Now;
+
+          
             // 1. Validaciones iniciales
             if (orden.PacienteId <= 0)
                 return new OperationResult(false, "Debe asignar un paciente.");
@@ -167,6 +174,8 @@ public class OrdenesService : IOrdenesService
         {
             // 4. Asignación del tipo correcto
             orden.Estado = estadoParseado;
+            orden.FechaModificacion = DateTime.Now;
+            orden.ModificadoPorId = AdminId;
 
             await _context.SaveChangesAsync();
             return new OperationResult(true, $"Estado de la orden actualizado a {estadoParseado}.");

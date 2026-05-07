@@ -3,16 +3,8 @@
   "WorkspaceRootPath": "C:\\Users\\DELL\\Documents\\GitHub\\BioLabApi\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{929A60B3-B48F-27B5-E470-EAD4F1DC7BDC}|BioLabApi.csproj|c:\\users\\dell\\documents\\github\\biolabapi\\biolabapi.sln||{8B382828-6202-11D1-8870-0000F87579D2}",
-      "RelativeMoniker": "D:0:0:{929A60B3-B48F-27B5-E470-EAD4F1DC7BDC}|BioLabApi.csproj|solutionrelative:biolabapi.sln||{8B382828-6202-11D1-8870-0000F87579D2}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{929A60B3-B48F-27B5-E470-EAD4F1DC7BDC}|BioLabApi.csproj|c:\\users\\dell\\documents\\github\\biolabapi\\services\\servicios\\pagosservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{929A60B3-B48F-27B5-E470-EAD4F1DC7BDC}|BioLabApi.csproj|solutionrelative:services\\servicios\\pagosservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{929A60B3-B48F-27B5-E470-EAD4F1DC7BDC}|BioLabApi.csproj|c:\\users\\dell\\documents\\github\\biolabapi\\services\\interfaces\\ipagosservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{929A60B3-B48F-27B5-E470-EAD4F1DC7BDC}|BioLabApi.csproj|solutionrelative:services\\interfaces\\ipagosservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{929A60B3-B48F-27B5-E470-EAD4F1DC7BDC}|BioLabApi.csproj|c:\\users\\dell\\documents\\github\\biolabapi\\models\\auditable.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{929A60B3-B48F-27B5-E470-EAD4F1DC7BDC}|BioLabApi.csproj|solutionrelative:models\\auditable.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -22,48 +14,32 @@
       "DocumentGroups": [
         {
           "DockedWidth": 222,
-          "SelectedChildIndex": 1,
+          "SelectedChildIndex": 3,
           "Children": [
             {
               "$type": "Bookmark",
               "Name": "ST:128:0:{75188d03-9892-4ae2-abf1-207126247ce5}"
             },
             {
+              "$type": "Bookmark",
+              "Name": "ST:1:0:{d212f56b-c48a-434c-a121-1c5d80b59b9f}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:128:0:{116d2292-e37d-41cd-a077-ebacac4c8cc4}"
+            },
+            {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "BioLabApi.sln",
-              "DocumentMoniker": "C:\\Users\\DELL\\Documents\\GitHub\\BioLabApi\\BioLabApi.sln",
-              "RelativeDocumentMoniker": "BioLabApi.sln",
-              "ToolTip": "C:\\Users\\DELL\\Documents\\GitHub\\BioLabApi\\BioLabApi.sln",
-              "RelativeToolTip": "BioLabApi.sln",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.002855|",
-              "WhenOpened": "2026-05-07T17:15:12.052Z",
+              "Title": "Auditable.cs",
+              "DocumentMoniker": "C:\\Users\\DELL\\Documents\\GitHub\\BioLabAPI\\Models\\Auditable.cs",
+              "RelativeDocumentMoniker": "Models\\Auditable.cs",
+              "ToolTip": "C:\\Users\\DELL\\Documents\\GitHub\\BioLabAPI\\Models\\Auditable.cs",
+              "RelativeToolTip": "Models\\Auditable.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-07T18:55:50.455Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "IPagosService.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Documents\\GitHub\\BioLabApi\\Services\\Interfaces\\IPagosService.cs",
-              "RelativeDocumentMoniker": "Services\\Interfaces\\IPagosService.cs",
-              "ToolTip": "C:\\Users\\DELL\\Documents\\GitHub\\BioLabApi\\Services\\Interfaces\\IPagosService.cs",
-              "RelativeToolTip": "Services\\Interfaces\\IPagosService.cs",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAMAAAAPAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-07T17:02:07.386Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "PagosService.cs",
-              "DocumentMoniker": "C:\\Users\\DELL\\Documents\\GitHub\\BioLabApi\\Services\\Servicios\\PagosService.cs",
-              "RelativeDocumentMoniker": "Services\\Servicios\\PagosService.cs",
-              "ToolTip": "C:\\Users\\DELL\\Documents\\GitHub\\BioLabApi\\Services\\Servicios\\PagosService.cs",
-              "RelativeToolTip": "Services\\Servicios\\PagosService.cs",
-              "ViewState": "AgIAAH8AAAAAAAAAAAAwwA0AAAApAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-07T17:01:40.004Z"
             }
           ]
         }

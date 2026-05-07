@@ -2,7 +2,7 @@ using System;
 
 namespace BioLabApi.Models;
 
-public class ExamenModel
+public class ExamenModel : Auditable
 {
     //simplemente es el modelo basico para un examen
 

@@ -5,7 +5,7 @@ using BioLabApi.Models;
 using BioLabApi.Services.Interfaces;
 using BioLabApi.Data;
 using Microsoft.EntityFrameworkCore;
-using BioLabAPI.Helpers;
+using BioLabApi.Helpers;
 
 
 namespace BioLabApi.Services.Servicios;
@@ -64,6 +64,11 @@ public class ExamenesService : IExamenesService
             {
                 return new ObjectOperationResult(false, examenValidationResult.Message, null);
             }
+
+            examen.FechaCreacion = DateTime.Now;
+            examen.CreadoPorId = AdminId;
+            examen.ModificadoPorId = AdminId;
+
             _appDbContext.Examenes.Add(examen);
             await _appDbContext.SaveChangesAsync();
             return new ObjectOperationResult(true, "Examen creado exitosamente.", examen);
@@ -98,6 +103,8 @@ public class ExamenesService : IExamenesService
             existingExamen.CostoEnDivisa = examen.CostoEnDivisa;
             existingExamen.CostoenBolivares = examen.CostoenBolivares;
             existingExamen.Descripcion = examen.Descripcion;
+            existingExamen.ModificadoPorId = AdminId;
+            existingExamen.FechaModificacion = DateTime.Now;
 
             await _appDbContext.SaveChangesAsync();
             return new OperationResult(true, "Examen actualizado exitosamente.");

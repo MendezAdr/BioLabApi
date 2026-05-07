@@ -1,7 +1,8 @@
 // Models/Paciente.cs
 
 namespace BioLabApi.Models;
-public class PacienteModel {
+public class PacienteModel : Auditable
+{
     /*
      * el modelo de paciente es bastante sencillo
      */

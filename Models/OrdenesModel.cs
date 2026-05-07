@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace BioLabApi.Models;
 
-public class OrdenesModel
+public class OrdenesModel : Auditable
 {
     /*
      * Una orden representa una venta realizada a un paciente, 
@@ -23,6 +23,7 @@ public class OrdenesModel
     public decimal TotalDivisa { get; set; }
     public decimal TasaBcv { get; set; } // La tasa del día de la venta
     public decimal TotalBs => TotalDivisa * TasaBcv; // Propiedad calculada
+
 
     // 1. Una Orden tiene muchos Exámenes (a través de Detalle)
     public List<DetalleModel> Detalles { get; set; } = new();

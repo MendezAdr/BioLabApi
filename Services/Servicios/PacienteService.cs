@@ -6,7 +6,7 @@ using BioLabApi.Models;
 using BioLabApi.Services.Interfaces;
 using BioLabApi.Data;
 using Microsoft.EntityFrameworkCore;
-using BioLabAPI.Helpers;
+using BioLabApi.Helpers;
 
 namespace BioLabApi.Services.Servicios;
 
@@ -111,7 +111,7 @@ public class PacienteService : IPacientesService
     //genericos
 
     //crea un paciente nuevo
-    public async Task<OperationResult> CreateAsync(PacienteModel paciente)
+    public async Task<OperationResult> CreateAsync(PacienteModel paciente, int userId)
     {
         var validationResult = ValidateInputUserData(paciente);
 
@@ -126,6 +126,11 @@ public class PacienteService : IPacientesService
 
         try
         {
+            paciente.CreadoPorId = userId;
+            paciente.ModificadoPorId = userId;
+            paciente.FechaCreacion = DateTime.Now;
+            paciente.FechaModificacion = DateTime.Now;
+
             await _appDbContext.Pacientes.AddAsync(paciente);
             await _appDbContext.SaveChangesAsync();
             return new OperationResult(true, "Paciente creado correctamente.");
@@ -138,7 +143,7 @@ public class PacienteService : IPacientesService
     }
 
     //actualiza un paciente existente
-    public async Task<OperationResult> UpdateAsync(PacienteModel paciente)
+    public async Task<OperationResult> UpdateAsync(PacienteModel paciente, int userId)
     {
         var validationResult = ValidateInputUserData(paciente);
 
@@ -159,6 +164,8 @@ public class PacienteService : IPacientesService
                 p.Cedula = paciente.Cedula;
                 p.Telefono = paciente.Telefono;
                 p.Direccion = paciente.Direccion;
+                p.ModificadoPorId = userId;
+                p.FechaModificacion = DateTime.Now;
             });
             await _appDbContext.SaveChangesAsync();
 
@@ -186,7 +193,9 @@ public class PacienteService : IPacientesService
         try
         {
             await _appDbContext.Pacientes.Where(p => p.Id == id).ForEachAsync(p =>
-            {
+            {   
+                p.ModificadoPorId = adminId;
+                p.FechaModificacion = DateTime.Now;
                 p.IsActive = false;
             });
             await _appDbContext.SaveChangesAsync();
@@ -215,6 +224,8 @@ public class PacienteService : IPacientesService
         {
             await _appDbContext.Pacientes.Where(p => p.Id == id).ForEachAsync(p =>
             {
+                p.ModificadoPorId = adminId;
+                p.FechaModificacion = DateTime.Now;
                 p.IsActive = true;
             });
             await _appDbContext.SaveChangesAsync();

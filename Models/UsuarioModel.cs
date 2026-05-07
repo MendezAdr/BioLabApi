@@ -3,7 +3,7 @@ using BioLabApi.Models;
 using System;
 
 namespace BioLabApi.Models;
-public class UsuarioModel
+public class UsuarioModel : Auditable
 {
     public int Id { get; set; }
     public string Username { get; set; } = string.Empty;
