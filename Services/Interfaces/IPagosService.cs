@@ -18,10 +18,8 @@ public interface IPagosService
     //metodos restantes
     Task<OperationResult> CreatePagoAsync(PagosModel pago);
     Task<OperationResult> UpdatePagoAsync(PagosModel pago, int adminId);
-    Task<OperationResult> DeactivatePagoAsync(int idPago, int adminId);
-    Task<ListOperationResult<PagosModel>> DeactivatePagosAsync(List<int> pagos, int adminId); 
-    Task<OperationResult> ActivatePagoAsync(int idPago, int adminId);
-    
+    Task<OperationResult> AnulatePagosAsync(int idPago, int adminId);
+
 
 
 }
