@@ -50,6 +50,7 @@ public class PagosService : IPagosService
         }
         
     }
+    
     // obtener todos los pagos filtrados por metodo
     public async Task<ListOperationResult<PagosModel>> GetPagosByMetodoAsync(int IdMetodo)
     {
@@ -130,25 +131,13 @@ public class PagosService : IPagosService
         }
     }
 
+    
     public async Task<OperationResult> UpdatePagoAsync(PagosModel pago, int adminId)
     {
-        
+        return null;
     }
 
-    public async Task<OperationResult> DeactivatePagoAsync(int idPago, int adminId)
-    {
-        
-    }
-
-    public async Task<ListOperationResult<PagosModel>> DeactivatePagosAsync(List<int> pagos, int adminId)
-    {
-        
-    }
-
-    public async Task<OperationResult> ActivatePagoAsync(int idPago, int adminId)
-    {
-        
-    }
+    
 
     
     // metodos de validacion
@@ -164,7 +153,11 @@ public class PagosService : IPagosService
         // monto
         if (pago.Monto < 0 || decimal.IsNegative(pago.Monto) || pago.Monto == null) return new OperationResult(false, "Inserte un monto valido");
         // referencia
-        if (string.IsNullOrEmpty(pago.Referencia)) return new OperationResult(false, "Inserte una referencia valida");
+        if (pago.Metodo == PagosModel.MetodoPago.PagoMovil || PagosModel.MetodoPago.Transferencia)
+        {
+            if(string.IsNullOrEmpty(pago.Referencia)) return new OperationResult(false, "Inserte una referencia valida");
+        }
+            
         
         return new OperationResult(true, "");
     }

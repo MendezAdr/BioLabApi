@@ -18,5 +18,7 @@ public interface IOrdenesService
     // Operaciones de escritura
     Task<OperationResult> CreateOrdenAsync(OrdenesModel orden, int usuarioId);
     Task<OperationResult> UpdateEstadoOrdenAsync(int id, string nuevoEstado, int AdminId);
+    Task<OperationResult> UpdateOrdenAsync(int id, OrdenesModel orden, int AdminId);
+
     Task<OperationResult> DeactivateOrdenAsync(int id, int AdminId);
 }

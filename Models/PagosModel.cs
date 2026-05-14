@@ -1,4 +1,3 @@
-using BioLabApi.Models;
 
 public class PagosModel
 {

@@ -16,12 +16,11 @@ public class OrdenesController : ControllerBase
     }
 
     // RF-15: Procesar una nueva venta/orden completa
-    [HttpPost]
-    public async Task<IActionResult> Create([FromBody] OrdenesModel nuevaOrden)
+    [HttpPost("{usuarioId}")]
+    public async Task<IActionResult> Create([FromQuery]int usuarioId, [FromBody] OrdenesModel nuevaOrden)
     {
         // El servicio debe encargarse de la transacción atómica
-        var result = await _ordenesService.CreateOrdenAsync(nuevaOrden);
-
+        var result = await _ordenesService.CreateOrdenAsync(nuevaOrden, usuarioId);
         if (!result.Success)
             return BadRequest(result);
 
@@ -59,4 +58,16 @@ public class OrdenesController : ControllerBase
 
         return Ok(result);
     }
+
+    [HttpPatch("{id}/actualizar")]
+    public async Task<IActionResult> Update(int id, [FromBody] OrdenesModel ordenActualizada, [FromQuery] int adminId)
+    {
+        var result = await _ordenesService.UpdateOrdenAsync(id, ordenActualizada, adminId);
+        if (!result.Success)
+            return BadRequest(result);
+        return Ok(result);
+    }
+
+
+
 }
