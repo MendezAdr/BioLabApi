@@ -1,0 +1,63 @@
+#################################################################################################################################################
+													
+													Estructura basica y logica
+														  del proyecto
+
+#################################################################################################################################################
+
+
+/ / / / / / / / / / / /
+Seccion de pagos:
+
+El usuario va a registrar una orden con uno o varios pagos, el sistema debe hacer lo siguiente:
+ ----Front End ----
+
+	-Captar la informacion de la orden, calcular el total reflejado de los pagos en BS
+	-Notificar inmediatamente si los pagos no son completos y dar la opcion de colocar pago en pendiente.
+	-Construir la estructura del json para enviarlo
+
+	-envia un Json con los datos de pago a travez del metodo http POST:
+	
+	# Una LISTA de los diferentes pagos con su cantidad exacta, con el metodo de pago de cada uno,
+	 Datos del paciente, el costo total de toda la orden EN DIVISAS, una LISTA de detalles para la relacion de pagos
+	 asi como el estado, y tambien el numero de factura fisica asociada al pago (el calculo de diferencia se hace en backend)#
+	
+ ----back end----
+
+ -Recibira en el controlador de Ordenes el http, y hara lo siguiente:
+ 
+ # Enviara el json deserializado al Servicio de Pagos con la informacion, y este hara lo siguiente:
+
+ -Validar el usuario y sus permisos
+ -Validar y CALCULAR los pagos en dolares y normalizar en bolivares
+ -Validar los metodos de pago, y que cada pago este correcto
+ -Calcular que los pagos sean iguales al total, y verificar estado de pago
+ -Si el pago esta como "parcial" o pendiente, aprobar y registrar, de lo contrario, rechazar el pago y enviar el error
+ -Verificar TODOS los pagos y sus estados.
+ -Verificar si la orden esta en pago parcial o total.
+ -Validar los datos relacionados al detalle de cada pago
+ -registrar el pago, retornar un json con el aprobado.
+
+ -----front end ----
+ -debe recibir el json, e inmediatamente, solicitar una actualizacion de la lista de pagos.
+ 
+
+ el usuario va a corregir o actualizar directamente un pago en especifico,
+ el estado de un pago o varios pagos relacioados como una orden.
+ se tomara cada pago individual como parte de una orden, no se puede crear ni tocar un pago si no es a travez de un orden
+ debe corregirse una orden unicamente con la intencion de actualizar estado de pagos,
+ para corregir totales, o para anular dicha orden en caso de algun inconveniente.
+ cosas que no se deben tocar al actualizar un pago: Cambiar la tasa del dia, cambiar al paciente completo,
+ fecha, numero de factura, el total que refleja la factura respecto a los pagos, la cedula o id del paciente
+
+ -Se dara acceso solamente a los usuarios con id que tengan un rol de administrador
+ -Solo podra modificar los campos que esten permitidos, no modificara todo el pago.
+ -construira un Json tomando informacion de la Orden original, luego rellenara los campos modificables con la nueva informacion.
+ -realizar validaciones basicas minimas de ser necesario.
+ 
+ -enviar la orden nueva con la id de la orden original, y el id administrador a travez del http PATCH
+
+ ----Back End ----
+
+
+
