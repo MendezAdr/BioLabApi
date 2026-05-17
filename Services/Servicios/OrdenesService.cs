@@ -156,11 +156,17 @@ public class OrdenesService : IOrdenesService
 
             if (orden.TasaBcv <= 0)
                 return new OperationResult(false, "La tasa BCV del día debe ser mayor a cero.");
-
+            
+            var Details = VerifyDetalles(orden.Detalles);
+            if (!Details.Success) return new OperationResult(false, Details.Message);
+            
+            var validPagos = ValidatePagos(orden.Pagos);
+            if (!validPagos.Success) return new OperationResult(false, validPagos.Message);
+            
             // 2. Lógica Bimodal: Normalizar todos los pagos a Divisa
             decimal totalPagadoNormalizado = 0;
 
-            foreach (var pago in orden)
+            foreach (var pago in orden.Pagos)
             {
                 
                 bool esPagoEnBs = (int)pago.Metodo >= 1 && (int)pago.Metodo <= 4;
@@ -211,69 +217,131 @@ public class OrdenesService : IOrdenesService
 
     public async Task<OperationResult> UpdateOrdenAsync(int id, OrdenesModel ordenModificada, int usuarioId)
     {
-        using var transaction = await _context.Database.BeginTransactionAsync();
+    using var transaction = await _context.Database.BeginTransactionAsync();
 
-        try
+    try
+    {
+        // 1. Cargar el registro original de la base de datos con sus listas hijas
+        var ordenDb = await _context.Ordenes
+            .Include(o => o.Detalles)
+            .Include(o => o.Pagos)
+            .FirstOrDefaultAsync(o => o.Id == id);
+
+        if (ordenDb == null) return new OperationResult(false, "La orden no existe.");
+
+        // Validación estricta de permisos del Administrador
+        var admin = await _context.Usuarios
+            .AsNoTracking()
+            .Include(u => u.Rol)
+            .FirstOrDefaultAsync(u => u.Id == usuarioId);
+        var permisosValidacion = ValidatePermisos(admin);
+        if (!permisosValidacion.Success) return new OperationResult(false, permisosValidacion.Message);
+
+        // Validamos el estado de los datos que vienen del frontend antes de operar
+        var detailsValid = VerifyDetalles(ordenModificada.Detalles);
+        if (!detailsValid.Success) return new OperationResult(false, detailsValid.Message);
+        
+        var validPagos = ValidatePagos(ordenModificada.Pagos);
+        if (!validPagos.Success) return new OperationResult(false, validPagos.Message);
+
+        // 2. ACTUALIZACIÓN SELECTIVA (Blindaje de datos maestros)
+        // Ignoramos PacienteId, TasaBcv y Fecha para mantener el registro histórico intacto
+        ordenDb.TotalDivisa = ordenModificada.TotalDivisa;
+        ordenDb.ModificadoPorId = usuarioId; 
+        ordenDb.FechaModificacion = DateTime.Now;
+
+        // 3. SINCRONIZACIÓN DIFERENCIAL DE PAGOS (Sin RemoveRange)
+        // A. Detectar y eliminar pagos que ya no vienen en la petición (si aplica la lógica)
+        var pagosEliminados = ordenDb.Pagos
+            .Where(pDb => !ordenModificada.Pagos.Any(pMod => pMod.Id == pDb.Id))
+            .ToList();
+            
+        foreach (var pagoEliminado in pagosEliminados)
         {
-            // 1. Cargar la orden actual con sus hijos (Detalles y Pagos)
-            var ordenDb = await _context.Ordenes
-                .Include(o => o.Detalles)
-                .Include(o => o.Pagos)
-                .FirstOrDefaultAsync(o => o.Id == id);
+            _context.Pagos.Remove(pagoEliminado);
+        }
 
-            if (ordenDb == null) return new OperationResult(false, "La orden no existe.");
-
-            var Admin = await _context.Usuarios
-                .AsNoTracking()
-                .Include(u => u.Rol)
-                .FirstOrDefaultAsync(u => u.Id == usuarioId);
-            var permisosValidacion = ValidatePermisos(Admin);
-            if (!permisosValidacion.Success) return new OperationResult(false, permisosValidacion.Message);
-
-            // 2. Actualizar campos básicos de la orden
-            ordenDb.TasaBcv = ordenModificada.TasaBcv;
-            ordenDb.TotalDivisa = ordenModificada.TotalDivisa;
-            ordenDb.ModificadoPorId = usuarioId; 
-            ordenDb.FechaModificacion = DateTime.Now;
-
-            // 3. Sincronizar Colecciones (Pagos/Detalles)
-            // Nota: Para simplificar en tu proyecto, podrías limpiar y re-agregar, 
-            // pero lo más profesional es actualizar los existentes.
-            _context.Pagos.RemoveRange(ordenDb.Pagos);
-            ordenDb.Pagos = ordenModificada.Pagos;
-
-            _context.Detalles.RemoveRange(ordenDb.Detalles);
-            ordenDb.Detalles = ordenModificada.Detalles;
-
-            // 4. Recalcular el Estado Bimodal (Logica de Divisa vs Bolívares)
-            decimal totalPagadoDivisa = 0;
-            foreach (var pago in ordenDb.Pagos)
+        // B. Actualizar existentes o agregar nuevos abonos
+        foreach (var pagoModificado in ordenModificada.Pagos)
+        {
+            if (pagoModificado.Id == 0)
             {
-                // Si el método es Bs (Punto, PagoMovil, etc. ), convertimos a divisa
-                bool esBs = (int)pago.Metodo >= 1 && (int)pago.Metodo <= 4;
-                totalPagadoDivisa += esBs ? (pago.Monto / ordenDb.TasaBcv) : pago.Monto;
+                // Es un nuevo abono para completar una orden parcial/pendiente
+                pagoModificado.OrdenId = ordenDb.Id;
+                ordenDb.Pagos.Add(pagoModificado);
             }
-
-            // 5. Asignar nuevo estado automáticamente
-            if (Math.Round(totalPagadoDivisa, 2) >= Math.Round(ordenDb.TotalDivisa, 2))
-                ordenDb.Estado = OrdenesModel.EstadoPago.Pagado;
-            else if (totalPagadoDivisa > 0 && totalPagadoDivisa < ordenDb.TotalDivisa )
-                ordenDb.Estado = OrdenesModel.EstadoPago.Parcial;
             else
-                ordenDb.Estado = OrdenesModel.EstadoPago.Pendiente;
-
-            await _context.SaveChangesAsync();
-            await transaction.CommitAsync();
-
-            return new OperationResult(true, "Orden y registros relacionados actualizados.");
+            {
+                // Es una corrección de un pago existente (monto, referencia, método)
+                var pagoExistente = ordenDb.Pagos.FirstOrDefault(p => p.Id == pagoModificado.Id);
+                if (pagoExistente != null)
+                {
+                    pagoExistente.Monto = pagoModificado.Monto;
+                    pagoExistente.Referencia = pagoModificado.Referencia;
+                    pagoExistente.Metodo = pagoModificado.Metodo;
+                    // El OrdenId y el Id de este pago no se alteran, protegiendo la auditoría
+                }
+            }
         }
-        catch (Exception ex)
+
+        // 4. SINCRONIZACIÓN DIFERENCIAL DE DETALLES (EXÁMENES VENDIDOS)
+        var detallesEliminados = ordenDb.Detalles
+            .Where(dDb => !ordenModificada.Detalles.Any(dMod => dMod.Id == dDb.Id))
+            .ToList();
+
+        foreach (var detalleEliminado in detallesEliminados)
         {
-            await transaction.RollbackAsync();
-            return new OperationResult(false, $"Error crítico: {ex.Message}");
+            _context.Detalles.Remove(detalleEliminado);
         }
-    }
 
+        foreach (var detalleModificado in ordenModificada.Detalles)
+        {
+            if (detalleModificado.Id == 0)
+            {
+                detalleModificado.OrdenId = ordenDb.Id;
+                ordenDb.Detalles.Add(detalleModificado);
+            }
+            else
+            {
+                var detalleExistente = ordenDb.Detalles.FirstOrDefault(d => d.Id == detalleModificado.Id);
+                if (detalleExistente != null)
+                {
+                    detalleExistente.ExamenId = detalleModificado.ExamenId;
+                    detalleExistente.PrecioMomentoDivisa = detalleModificado.PrecioMomentoDivisa;
+                }
+            }
+        }
+
+        // 5. RECALCULAR EL ESTADO BIMODAL AUTOMÁTICAMENTE
+        decimal totalPagadoDivisa = 0;
+        foreach (var p in ordenDb.Pagos)
+        {
+            bool esBs = (int)p.Metodo >= 1 && (int)p.Metodo <= 4;
+            totalPagadoDivisa += esBs ? (p.Monto / ordenDb.TasaBcv) : p.Monto;
+        }
+
+        var totalRequerido = Math.Round(ordenDb.TotalDivisa, 2);
+        totalPagadoDivisa = Math.Round(totalPagadoDivisa, 2);
+
+        if (totalPagadoDivisa >= totalRequerido)
+            ordenDb.Estado = OrdenesModel.EstadoPago.Pagado;
+        else if (totalPagadoDivisa > 0)
+            ordenDb.Estado = OrdenesModel.EstadoPago.Parcial;
+        else
+            ordenDb.Estado = OrdenesModel.EstadoPago.Pendiente;
+
+        // 6. Confirmación de Persistencia
+        await _context.SaveChangesAsync();
+        await transaction.CommitAsync();
+
+        return new OperationResult(true, "Orden y registros asociados corregidos mediante actualización diferencial.");
+    }
+    catch (Exception ex)
+    {
+        await transaction.RollbackAsync();
+        return new OperationResult(false, $"Error crítico en la sincronización: {ex.Message}");
+    }
+    }
 
     public async Task<OperationResult> UpdateEstadoOrdenAsync(int id, string nuevoEstado, int AdminId)
     {
@@ -342,31 +410,46 @@ public class OrdenesService : IOrdenesService
 
 
 
-    public OperationResult validatePagos(List<PagosModel> pagos)
+    
+    public OperationResult ValidatePagos(List<PagosModel> pagos)
     {
         foreach (var pago in pagos)
         {
-        // metodo
-        if (pago.Metodo == null) return new OperationResult(false, "No puedes registrar un pago sin especificar el metodo") break;
-        // monto
-        if (pago.Monto < 0 || decimal.IsNegative(pago.Monto) || pago.Monto == null) return new OperationResult(false, "Inserte un monto valido en el pago") break;
-            // referencia
-            if (pago.Metodo == PagosModel.MetodoPago.PagoMovil || PagosModel.MetodoPago.Transferencia)
-            {
-                if (string.IsNullOrEmpty(pago.Referencia)) return new OperationResult(false, "Inserte una referencia valida") break;
-            }
+            // No es necesario validar "null" para un enum, pero sí que sea mayor a 0
+            if ((int)pago.Metodo <= 0)
+                return new OperationResult(false, "No puedes registrar un pago sin especificar el metodo válido.");
 
+            // Validamos el monto
+            if (pago.Monto <= 0)
+                return new OperationResult(false, "Inserte un monto válido mayor a cero en el pago.");
+
+            // Corregido: Sin el punto y coma traicionero y simplificado
+            bool esPagoDigital = pago.Metodo == PagosModel.MetodoPago.PagoMovil || 
+                                 pago.Metodo == PagosModel.MetodoPago.Transferencia;
+
+            if (esPagoDigital && string.IsNullOrWhiteSpace(pago.Referencia))
+            {
+                return new OperationResult(false, "Los pagos digitales requieren una referencia obligatoria.");
+            }
         }
         return new OperationResult(true, "");
     }
 
     public OperationResult VerifyDetalles(List<DetalleModel> detalles)
     {
+        if (detalles == null || detalles.Count == 0)
+            return new OperationResult(false, "La orden debe contener al menos un detalle (examen).");
+
         foreach(var detalle in detalles)
         {
-            if (detalle.Examen is null) return new OperationResult(false, "Error: debe haber al menos un examen para el detalle correspondiente") break; 
+            // Validamos el ID, ya que el objeto Examen completo podría no venir del frontend
+            if (detalle.ExamenId <= 0) 
+                return new OperationResult(false, "Error: debe haber al menos un examen válido para cada detalle.");
+        
+            if (detalle.PrecioMomentoDivisa < 0)
+                return new OperationResult(false, "El precio del examen no puede ser negativo.");
         } 
-
+        return new OperationResult(true, "");
     }
 
    
