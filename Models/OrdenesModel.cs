@@ -38,6 +38,7 @@ public class OrdenesModel : Auditable
     {
         Pagado = 1,
         Pendiente = 2,
-        Parcial = 3
+        Parcial = 3,
+        Anulada = 4
     }
 }
