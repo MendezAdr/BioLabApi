@@ -24,7 +24,10 @@ public class PagosService : IPagosService
     {
         try
         {
-            var pago = await _dbContext.Pagos.FirstOrDefaultAsync(p => p.Id == id);
+            var pago = await _dbContext.Pagos
+                .Include(x => x.Orden)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(p => p.Id == id);
             if (pago == null) return new ObjectOperationResult(false, "Error, el pago buscado no existe", null);
             return new ObjectOperationResult(true, "", pago);
         }
@@ -37,6 +40,7 @@ public class PagosService : IPagosService
     public async Task<ObjectOperationResult> GetPagoByReferenciaAsync(string ReferenciaId)
     {
         var pago = await  _dbContext.Pagos
+            .Include (x => x.Orden)
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Referencia.Equals(ReferenciaId));
         if (pago == null) return new ObjectOperationResult(false, "Error, no existen pagos asociados a esa referencia", null);
@@ -55,6 +59,7 @@ public class PagosService : IPagosService
     public async Task<ListOperationResult<PagosModel>> GetPagosByMetodoAsync(int IdMetodo)
     {
         var listaPagos = await _dbContext.Pagos
+            .Include(x => x.Orden)
             .AsNoTracking()
             .Where(p => p.Metodo.Equals(IdMetodo))
             .ToListAsync();
@@ -73,6 +78,7 @@ public class PagosService : IPagosService
     public async Task<ListOperationResult<PagosModel>> GetPagosByOrdenAsync(int OrdenId)
     {
         var listaPagos = await _dbContext.Pagos
+            .Include (x => x.Orden)
             .AsNoTracking()
             .Where(p => p.OrdenId == OrdenId)
             .ToListAsync();
@@ -95,6 +101,7 @@ public class PagosService : IPagosService
     public async Task<ListOperationResult<PagosModel>> GetAllPagosEntreFechasAsync(DateTime? fechaInicio, DateTime? fechaFin)
     {
         var listaPagos = await _dbContext.Pagos
+            .Include(x => x.Orden)
             .AsNoTracking()
             .Where(p => p.Orden.Fecha >= fechaInicio && p.Orden.Fecha <= fechaFin)
             .ToListAsync();
@@ -108,10 +115,7 @@ public class PagosService : IPagosService
         }
     }
     
-    
-    
-    
-    
+         
     //metodos restantes
     public async Task<OperationResult> CreatePagoAsync(PagosModel pago)
     {
@@ -186,6 +190,7 @@ public class PagosService : IPagosService
         }
     }
 
+    
     public async Task<OperationResult> AnulatePagosAsync(int idPago, int adminId)
     {
         var admin = await _dbContext.Usuarios.Include(u => u.Rol).FirstOrDefaultAsync(u => u.Id == adminId);
@@ -235,6 +240,7 @@ public class PagosService : IPagosService
     
         return new OperationResult(true, "");
     }
+    
     
     public OperationResult ValidatePermisos(UsuarioModel adminValidate)
     {

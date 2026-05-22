@@ -15,56 +15,70 @@ public class OrdenesController : ControllerBase
         _ordenesService = ordenesService;
     }
 
-    // RF-15: Procesar una nueva venta/orden completa
-    [HttpPost("{usuarioId}")]
-    public async Task<IActionResult> Create([FromQuery]int usuarioId, [FromBody] OrdenesModel nuevaOrden)
+    [HttpGet]
+    public async Task<IActionResult> Get([FromHeader(Name = "X-Admin-Id")] int adminId)
     {
-        // El servicio debe encargarse de la transacción atómica
-        var result = await _ordenesService.CreateOrdenAsync(nuevaOrden, usuarioId);
-        if (!result.Success)
-            return BadRequest(result);
-
+        var result = await _ordenesService.GetAllOrdenesAsync(adminId);
+        if (!result.Success) return NotFound(result);
         return Ok(result);
     }
 
     // RF-13: Obtener orden por ID con sus detalles y pagos
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id, [FromQuery] int adminId)
+    public async Task<IActionResult> GetById([FromRoute] int id, [FromHeader(Name = "X-Admin-Id")] int adminId)
     {
         var result = await _ordenesService.GetOrdenByIdAsync(id, adminId);
-
-        if (!result.Success)
-            return NotFound(result);
-
+        if (!result.Success) return NotFound(result);
         return Ok(result);
     }
 
     // RF-13: Consultar histórico por rango de fechas
     [HttpGet("rango")]
-    public async Task<IActionResult> GetByDateRange( [FromQuery] DateTime inicio, [FromQuery] DateTime fin, [FromQuery] int adminId)
+    public async Task<IActionResult> GetByFechas([FromQuery] DateTime inicio, [FromQuery] DateTime fin, [FromHeader(Name = "X-Admin-Id")] int adminId)
     {
         var result = await _ordenesService.GetAllOrdenesEntreFechasAsync(inicio, fin, adminId);
         return Ok(result);
     }
 
-    // RF-18: Anulación de ventas (Cambio de estado)
-    [HttpPatch("{id}/anular")]
-    public async Task<IActionResult> Anular(int id, [FromQuery] int adminId)
+    [HttpGet("paciente/{pacienteId}")]
+    public async Task<IActionResult> GetByPaciente([FromRoute] int pacienteId, [FromHeader(Name = "X-Admin-Id")] int adminId)
     {
-        var result = await _ordenesService.DeactivateOrdenAsync(id, adminId);
-
-        if (!result.Success)
-            return BadRequest(result);
-
+        var result = await _ordenesService.GetAllOrdenesByPacienteAsync(pacienteId, adminId);
+        if (!result.Success) return NotFound(result);
         return Ok(result);
     }
 
-    [HttpPatch("{id}/actualizar")]
-    public async Task<IActionResult> Update(int id, [FromBody] OrdenesModel ordenActualizada, [FromQuery] int adminId)
+    [HttpGet("estado/{estado}")]
+    public async Task<IActionResult> GetByEstado([FromRoute] OrdenesModel.EstadoPago estado, [FromHeader(Name = "X-Admin-Id")] int adminId)
+    {
+        var result = await _ordenesService.GetAllOrdenesByEstadoAsync(estado, adminId);
+        if (!result.Success) return NotFound(result);
+        return Ok(result);
+    }
+
+    // RF-15: Procesar una nueva venta/orden completa
+    [HttpPost]
+    public async Task<IActionResult> Create([FromHeader(Name = "X-Usuario-Id")] int usuarioId, [FromBody] OrdenesModel nuevaOrden)
+    {
+        var result = await _ordenesService.CreateOrdenAsync(nuevaOrden, usuarioId);
+        if (!result.Success) return BadRequest(result);
+        return Ok(result);
+    }
+
+    // RF-18: Anulación de ventas (Cambio de estado)
+    [HttpPatch("{id}/anular")]
+    public async Task<IActionResult> Anular([FromRoute] int id, [FromHeader(Name = "X-Admin-Id")] int adminId)
+    {
+        var result = await _ordenesService.DeactivateOrdenAsync(id, adminId);
+        if (!result.Success) return BadRequest(result);
+        return Ok(result);
+    }
+
+    [HttpPut("{id}/actualizar")]
+    public async Task<IActionResult> Update([FromRoute] int id, [FromBody] OrdenesModel ordenActualizada, [FromHeader(Name = "X-Admin-Id")] int adminId)
     {
         var result = await _ordenesService.UpdateOrdenAsync(id, ordenActualizada, adminId);
-        if (!result.Success)
-            return BadRequest(result);
+        if (!result.Success) return BadRequest(result);
         return Ok(result);
     }
 

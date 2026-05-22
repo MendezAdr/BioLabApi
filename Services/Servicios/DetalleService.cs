@@ -29,7 +29,10 @@ private readonly AppDbContext _context;
     {
         try
         {
-            var Detalle = await _context.Detalles.AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
+            var Detalle = await _context.Detalles
+                .Include(x => x.Orden)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(e => e.Id == id);
             if (Detalle == null) return new ObjectOperationResult(false, "El detalle asociado al Id no existe", null);
             return new ObjectOperationResult(true, "", Detalle);
                     
@@ -47,6 +50,7 @@ private readonly AppDbContext _context;
         try
         {
             var DetalleList =await _context.Detalles
+                .Include(x => x.Orden)
                 .AsNoTracking()
                 .Where(e => e.OrdenId == oid)
                 .ToListAsync();
@@ -71,6 +75,7 @@ private readonly AppDbContext _context;
         try
         {
             var DetalleList = await _context.Detalles
+                .Include(x => x.Orden)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(d => d.ExamenId == Eid);
 
@@ -87,6 +92,8 @@ private readonly AppDbContext _context;
         } 
     }
     
+
+
     // crear un detalle
     public async Task<OperationResult> CreateDetalleAsync(DetalleModel detalle)
     {

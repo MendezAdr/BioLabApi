@@ -13,7 +13,7 @@ public interface IOrdenesService
     Task<ListOperationResult<OrdenesModel>> GetAllOrdenesAsync(int AdminId);
     Task<ListOperationResult<OrdenesModel>> GetAllOrdenesByPacienteAsync(int idPaciente, int AdminId);
     Task<ListOperationResult<OrdenesModel>> GetAllOrdenesEntreFechasAsync(DateTime inicio, DateTime fin, int AdminId);
-    Task<ListOperationResult<OrdenesModel>> GetAllOrdenesByEstadoAsync(string estado, int AdminId);
+    Task<ListOperationResult<OrdenesModel>> GetAllOrdenesByEstadoAsync(OrdenesModel.EstadoPago estado, int AdminId);
 
     // Operaciones de escritura
     Task<OperationResult> CreateOrdenAsync(OrdenesModel orden, int usuarioId);

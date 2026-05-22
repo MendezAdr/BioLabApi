@@ -115,7 +115,8 @@ public class OrdenesService : IOrdenesService
         return new ListOperationResult<OrdenesModel>(true, "", lista);
     }
 
-    public async Task<ListOperationResult<OrdenesModel>> GetAllOrdenesByEstadoAsync(string estado, int AdminId)
+    ///muy importante, verificar la transformacion de estado!!! y revisar el controlador tambien
+    public async Task<ListOperationResult<OrdenesModel>> GetAllOrdenesByEstadoAsync(OrdenesModel.EstadoPago estado, int AdminId)
     {
         var admin = await _context.Usuarios
                 .Include(u => u.Rol)
@@ -125,7 +126,7 @@ public class OrdenesService : IOrdenesService
         if (!validacion.Success) return new ListOperationResult<OrdenesModel>(false, validacion.Message, null);
 
         var lista = await _context.Ordenes
-            .Where(o => o.Estado.Equals(estado))
+            .Where(o => o.Estado == estado)
             .Include(o => o.Paciente)
             .AsNoTracking()
             .ToListAsync();
@@ -343,6 +344,8 @@ public class OrdenesService : IOrdenesService
     }
     }
 
+
+    /// muy importante, verificar la transformacion del estado!!!
     public async Task<OperationResult> UpdateEstadoOrdenAsync(int id, string nuevoEstado, int AdminId)
     {
         // 1. Validación de Permisos
@@ -387,6 +390,8 @@ public class OrdenesService : IOrdenesService
         return await UpdateEstadoOrdenAsync(id, "Anulada", AdminId);
     }
 
+    
+    
     // Implementaciones adicionales de filtrado
     
 
@@ -409,8 +414,6 @@ public class OrdenesService : IOrdenesService
     }
 
 
-
-    
     public OperationResult ValidatePagos(List<PagosModel> pagos)
     {
         foreach (var pago in pagos)
@@ -435,6 +438,7 @@ public class OrdenesService : IOrdenesService
         return new OperationResult(true, "");
     }
 
+    
     public OperationResult VerifyDetalles(List<DetalleModel> detalles)
     {
         if (detalles == null || detalles.Count == 0)

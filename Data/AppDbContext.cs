@@ -21,30 +21,16 @@ public class AppDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
-        options.UseSqlite("Data Source = Laboratorio.Db");
+        options.UseSqlite("Data Source = Laboratorio.Db")
+        .ConfigureWarnings(warnings => warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // 1. Seeding de Roles
-        modelBuilder.Entity<RolModel>().HasData(
-            new RolModel { Id = 1, RolName = "Administrador", Permisos = RolModel.PermisosSistema.HacerCierre },
-            new RolModel { Id = 2, RolName = "Bioanalista", Permisos = RolModel.PermisosSistema.CrearVenta }
-        );
-
         // 2. Seeding de Usuario Administrador Inicial
-        modelBuilder.Entity<UsuarioModel>().HasData(
-            new UsuarioModel
-            {
-                Id = 1,
-                Nombre = "Adrian",
-                Apellido = "Mendez",
-                Cedula = "12345678",
-                RolId = 1,
-                Contrasena = PasswordHasher.PasswordHash("1234567890"),
-                IsActive = true
-            }
-        );
+
+
 
         // 3. Relación Orden -> Detalles (¡Solo una vez!)
         modelBuilder.Entity<DetalleModel>()

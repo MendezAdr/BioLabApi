@@ -1,12 +1,13 @@
+using BioLabApi.Data;
+using BioLabApi.Helpers;
+using BioLabApi.Models;
+using BioLabApi.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BioLabApi.Models;
-using BioLabApi.Services.Interfaces;
-using BioLabApi.Data;
-using Microsoft.EntityFrameworkCore;
-using BioLabApi.Helpers;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace BioLabApi.Services.Servicios;
 
@@ -59,7 +60,8 @@ public class PacienteService : IPacientesService
         { 
             var paciente = await _appDbContext.Pacientes
                 .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.Nombre == nombre);
+                .Where(p => p.Nombre.ToLower().Contains(nombre.Trim().ToLower()))
+                .FirstOrDefaultAsync();
             if (paciente == null) return new ObjectOperationResult(false, "Paciente no encontrado.", null);
 
             return new ObjectOperationResult(true, "Paciente obtenido correctamente.", paciente);
@@ -77,7 +79,8 @@ public class PacienteService : IPacientesService
         {
             var paciente = await _appDbContext.Pacientes
                 .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.Apellido == apellido);
+                .Where(p => p.Apellido.ToLower().Contains(apellido.Trim().ToLower()))
+                .FirstOrDefaultAsync();
             if (paciente == null) return new ObjectOperationResult(false, "Paciente no encontrado.", null);
 
             return new ObjectOperationResult(true, "Paciente obtenido correctamente.", paciente);
@@ -93,6 +96,7 @@ public class PacienteService : IPacientesService
     {
         try
         {
+
             var paciente = await _appDbContext.Pacientes
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Cedula == cedula);
@@ -131,6 +135,10 @@ public class PacienteService : IPacientesService
             paciente.FechaCreacion = DateTime.Now;
             paciente.FechaModificacion = DateTime.Now;
 
+            paciente.Nombre = paciente.Nombre.Trim();
+            paciente.Apellido = paciente.Apellido.Trim();
+            paciente.Cedula = paciente.Cedula.Trim();
+
             await _appDbContext.Pacientes.AddAsync(paciente);
             await _appDbContext.SaveChangesAsync();
             return new OperationResult(true, "Paciente creado correctamente.");
@@ -151,21 +159,26 @@ public class PacienteService : IPacientesService
         {
             return validationResult;
         }
-        if (await _appDbContext.Pacientes.AnyAsync(p => p.Id == paciente.Id) == false)
-        {
-            return new OperationResult(false, "Paciente no encontrado.");
-        }
+        
+        var pacienteDb = await _appDbContext.Pacientes.FindAsync(paciente.Id);
+        if (pacienteDb == null)
+            return new OperationResult(false, "El paciente a modificar no existe.");
+
+        var cedulaDuplicada = await _appDbContext.Pacientes.AnyAsync(p => p.Cedula == paciente.Cedula.Trim() && p.Id != paciente.Id);
+        if (cedulaDuplicada)
+            return new OperationResult(false, "La cédula ingresada ya pertenece a otro paciente.");
+
         try
         {   
             await _appDbContext.Pacientes.Where(p => p.Id == paciente.Id).ForEachAsync(p =>
             {
-                p.Nombre = paciente.Nombre;
-                p.Apellido = paciente.Apellido;
-                p.Cedula = paciente.Cedula;
-                p.Telefono = paciente.Telefono;
-                p.Direccion = paciente.Direccion;
+                p.Nombre = paciente.Nombre.Trim();
+                p.Apellido = paciente.Apellido.Trim();
+                p.Cedula = paciente.Cedula.Trim();
                 p.ModificadoPorId = userId;
                 p.FechaModificacion = DateTime.Now;
+                p.Telefono = string.IsNullOrWhiteSpace(paciente.Telefono) ? "N/A" : paciente.Telefono.Trim();
+                p.Direccion = string.IsNullOrWhiteSpace(paciente.Direccion) ? "N/A" : paciente.Direccion.Trim();
             });
             await _appDbContext.SaveChangesAsync();
 
@@ -179,28 +192,13 @@ public class PacienteService : IPacientesService
 
     //elimina (desactiva) un paciente por su id
     public async Task<OperationResult> DeactivateAsync(int id, int adminId) {
-        
-        var adminValidate = await _appDbContext.Usuarios.FindAsync(adminId);
-        var permisosResult = ValidatePermisos(adminValidate);
-        if (!permisosResult.Success)
-        {
-            return permisosResult;
-        }
-        if (await _appDbContext.Pacientes.AnyAsync(p => p.Id == id) == false)
-        {
-            return new OperationResult(false, "Paciente no encontrado.");
-        }
+
         try
         {
-            await _appDbContext.Pacientes.Where(p => p.Id == id).ForEachAsync(p =>
-            {   
-                p.ModificadoPorId = adminId;
-                p.FechaModificacion = DateTime.Now;
-                p.IsActive = false;
-            });
-            await _appDbContext.SaveChangesAsync();
-            return new OperationResult(true, "Paciente desactivado correctamente.");
+            await ActivateAsync(id, adminId, false);
         }
+        
+        
         catch (Exception ex)
         {
             return new OperationResult(false, $"Error al desactivar paciente: {ex.Message}");
@@ -208,7 +206,7 @@ public class PacienteService : IPacientesService
     }
 
     //reactiva un paciente por su id
-    public async Task<OperationResult> ActivateAsync(int id, int adminId)
+    public async Task<OperationResult> ActivateAsync(int id, int adminId, bool state = true)
     {
         var adminValidate = await _appDbContext.Usuarios.FindAsync(adminId);
         var permisosResult = ValidatePermisos(adminValidate);
@@ -226,14 +224,14 @@ public class PacienteService : IPacientesService
             {
                 p.ModificadoPorId = adminId;
                 p.FechaModificacion = DateTime.Now;
-                p.IsActive = true;
+                p.IsActive = state;
             });
             await _appDbContext.SaveChangesAsync();
-            return new OperationResult(true, "Paciente reactivado correctamente.");
+            return new OperationResult(true, "Paciente actualizado correctamente.");
         }
         catch (Exception ex)
         {
-            return new OperationResult(false, $"Error al reactivar paciente: {ex.Message}");
+            return new OperationResult(false, $"Error al actualizar paciente: {ex.Message}");
         }
     }
 
