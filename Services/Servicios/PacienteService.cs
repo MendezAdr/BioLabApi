@@ -195,7 +195,8 @@ public class PacienteService : IPacientesService
 
         try
         {
-            await ActivateAsync(id, adminId, false);
+            var result = await ActivateAsync(id, adminId, false);
+            return result;
         }
         
         

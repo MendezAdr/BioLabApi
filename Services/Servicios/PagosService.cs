@@ -14,11 +14,11 @@ namespace BioLabApi.Services.Servicios;
 public class PagosService : IPagosService
 {
     private readonly AppDbContext _dbContext;
-    public PagosService (AppDbContext dbContext)
+    public PagosService(AppDbContext dbContext)
     {
         _dbContext = dbContext;
     }
-    
+
     //obtener un pago especifico
     public async Task<ObjectOperationResult> GetPagoByIdAsync(int id)
     {
@@ -36,11 +36,11 @@ public class PagosService : IPagosService
             return new ObjectOperationResult(false, $"Error: {e.Message} ", null);
         }
     }
-    
+
     public async Task<ObjectOperationResult> GetPagoByReferenciaAsync(string ReferenciaId)
     {
-        var pago = await  _dbContext.Pagos
-            .Include (x => x.Orden)
+        var pago = await _dbContext.Pagos
+            .Include(x => x.Orden)
             .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Referencia.Equals(ReferenciaId));
         if (pago == null) return new ObjectOperationResult(false, "Error, no existen pagos asociados a esa referencia", null);
@@ -52,9 +52,9 @@ public class PagosService : IPagosService
         {
             return new ObjectOperationResult(false, $"Error: {e.Message} ", null);
         }
-        
+
     }
-    
+
     // obtener todos los pagos filtrados por metodo
     public async Task<ListOperationResult<PagosModel>> GetPagosByMetodoAsync(int IdMetodo)
     {
@@ -70,30 +70,30 @@ public class PagosService : IPagosService
         }
         catch (Exception e)
         {
-            return  new ListOperationResult<PagosModel>(false, $"Error: {e.Message} ", null);
+            return new ListOperationResult<PagosModel>(false, $"Error: {e.Message} ", null);
         }
     }
-    
+
     //obtener los pagos asociados a una orden
     public async Task<ListOperationResult<PagosModel>> GetPagosByOrdenAsync(int OrdenId)
     {
         var listaPagos = await _dbContext.Pagos
-            .Include (x => x.Orden)
+            .Include(x => x.Orden)
             .AsNoTracking()
             .Where(p => p.OrdenId == OrdenId)
             .ToListAsync();
         try
         {
-        if (listaPagos == null)
-        {
-            return new ListOperationResult<PagosModel>(false, "Error, no existen pagos asociados a esa orden", null);
-        }
-        return new ListOperationResult<PagosModel>(true, "", listaPagos);
+            if (listaPagos == null)
+            {
+                return new ListOperationResult<PagosModel>(false, "Error, no existen pagos asociados a esa orden", null);
+            }
+            return new ListOperationResult<PagosModel>(true, "", listaPagos);
 
         }
         catch (Exception e)
         {
-            return  new ListOperationResult<PagosModel>(false, $"Error: {e.Message} ", null);
+            return new ListOperationResult<PagosModel>(false, $"Error: {e.Message} ", null);
         }
     }
 
@@ -114,20 +114,31 @@ public class PagosService : IPagosService
             return new ListOperationResult<PagosModel>(false, $"Error: {e.Message} ", null);
         }
     }
-    
-         
+
+
     //metodos restantes
     public async Task<OperationResult> CreatePagoAsync(PagosModel pago)
     {
         var validPago = validatePago(pago);
         if (!validPago.Success) return validPago;
-        
+
         try
         {
+            // Agregamos el pago
             await _dbContext.Pagos.AddAsync(pago);
-            await _dbContext.SaveChangesAsync();
-            return new OperationResult(true, "Pago registrado con exito.");
 
+            // CRÍTICO: Necesitamos cargar la orden y TODOS sus pagos (incluyendo el nuevo) para recalcular
+            var orden = await _dbContext.Ordenes
+                .Include(o => o.Pagos)
+                .FirstOrDefaultAsync(o => o.Id == pago.OrdenId);
+
+            if (orden != null)
+            {
+                SincronizarPagosConOrden(orden);
+            }
+
+            await _dbContext.SaveChangesAsync();
+            return new OperationResult(true, "Pago registrado y orden sincronizada con éxito.");
         }
         catch (Exception e)
         {
@@ -135,51 +146,32 @@ public class PagosService : IPagosService
         }
     }
 
-    
     public async Task<OperationResult> UpdatePagoAsync(PagosModel pago, int adminId)
     {
-        // 1. Validar Permisos del Administrador
-        var admin = await _dbContext.Usuarios
-            .AsNoTracking()
-            .Include(u => u.Rol)
-            .FirstOrDefaultAsync(u => u.Id == adminId);
-
+        var admin = await _dbContext.Usuarios.AsNoTracking().Include(u => u.Rol).FirstOrDefaultAsync(u => u.Id == adminId);
         var validPermisos = ValidatePermisos(admin);
         if (!validPermisos.Success) return validPermisos;
 
-        // 2. Validar los datos del objeto pago
-        var validPago = validatePago(pago); 
+        var validPago = validatePago(pago);
         if (!validPago.Success) return validPago;
 
-        // 3. Buscar el pago existente INCLUYENDO la orden y todos sus pagos hermanos
+        // Búsqueda del pago INCLUYENDO la orden y todos los pagos hermanos
         var pagoDb = await _dbContext.Pagos
             .Include(p => p.Orden)
-            .ThenInclude(o => o.Pagos)
+            .ThenInclude(o => o.Pagos) // <-- Vital para el recálculo
             .FirstOrDefaultAsync(p => p.Id == pago.Id);
 
         if (pagoDb == null) return new OperationResult(false, "El pago no existe.");
 
         try
         {
-            // 4. Actualizar los campos permitidos
+            // Actualización quirúrgica
             pagoDb.Monto = pago.Monto;
             pagoDb.Referencia = pago.Referencia;
             pagoDb.Metodo = pago.Metodo;
 
-            // 5. RECALCULAR EL ESTADO DE LA ORDEN
-            decimal totalPagadoDivisa = 0;
-            foreach (var p in pagoDb.Orden.Pagos)
-            {
-                bool esBs = (int)p.Metodo >= 1 && (int)p.Metodo <= 4;
-                totalPagadoDivisa += esBs ? (p.Monto / pagoDb.Orden.TasaBcv) : p.Monto;
-            }
-
-            if (Math.Round(totalPagadoDivisa, 2) >= Math.Round(pagoDb.Orden.TotalDivisa, 2))
-                pagoDb.Orden.Estado = OrdenesModel.EstadoPago.Pagado;
-            else if (totalPagadoDivisa > 0)
-                pagoDb.Orden.Estado = OrdenesModel.EstadoPago.Parcial;
-            else
-                pagoDb.Orden.Estado = OrdenesModel.EstadoPago.Pendiente;
+            // Recálculo automático reutilizando tu método
+            SincronizarPagosConOrden(pagoDb.Orden);
 
             await _dbContext.SaveChangesAsync();
             return new OperationResult(true, "Pago actualizado y orden recalculada con éxito.");
@@ -190,23 +182,26 @@ public class PagosService : IPagosService
         }
     }
 
-    
     public async Task<OperationResult> AnulatePagosAsync(int idPago, int adminId)
     {
         var admin = await _dbContext.Usuarios.Include(u => u.Rol).FirstOrDefaultAsync(u => u.Id == adminId);
         var validPermisos = ValidatePermisos(admin);
         if (!validPermisos.Success) return validPermisos;
 
-        var pagoDb = await _dbContext.Pagos.FirstOrDefaultAsync(p => p.Id == idPago);
+        var pagoDb = await _dbContext.Pagos
+            .Include(p => p.Orden)
+            .ThenInclude(o => o.Pagos) // <-- CRÍTICO: Faltaba esto en tu código original
+            .FirstOrDefaultAsync(p => p.Id == idPago);
+
         if (pagoDb == null) return new OperationResult(false, "El pago no existe.");
 
         try
         {
             pagoDb.Monto = 0;
             pagoDb.Referencia = $"ANULADO - {pagoDb.Referencia}";
-        
-            // Al igual que en Update, deberías llamar a la lógica para recalcular el estado de la Orden aquí
-            // (Puedes extraer ese bloque de recálculo a un método privado para reutilizarlo)
+
+            // Recálculo automático
+            SincronizarPagosConOrden(pagoDb.Orden);
 
             await _dbContext.SaveChangesAsync();
             return new OperationResult(true, "Pago anulado correctamente.");
@@ -221,38 +216,55 @@ public class PagosService : IPagosService
     // metodos de validacion
 
     public OperationResult validatePago(PagosModel pago)
-    {   
+    {
         // OrdenId es int, su valor por defecto es 0 si no se asigna
-        if (pago.OrdenId <= 0) 
+        if (pago.OrdenId <= 0)
             return new OperationResult(false, "No puede registrar un pago sin una orden válida.");
-    
+
         // Monto es decimal, verificamos que sea mayor a 0
-        if (pago.Monto <= 0) 
+        if (pago.Monto <= 0)
             return new OperationResult(false, "Inserte un monto válido mayor a cero.");
-        
+
         // La referencia no puede estar vacía
-        if (string.IsNullOrWhiteSpace(pago.Referencia)) 
+        if (string.IsNullOrWhiteSpace(pago.Referencia))
             return new OperationResult(false, "Inserte una referencia válida.");
-    
+
         // Enum Metodo siempre tiene un valor por defecto, podríamos validar que esté en el rango si es necesario
         if (!Enum.IsDefined(typeof(PagosModel.MetodoPago), pago.Metodo))
             return new OperationResult(false, "El método de pago seleccionado no es válido.");
-    
+
         return new OperationResult(true, "");
     }
-    
-    
+
+
     public OperationResult ValidatePermisos(UsuarioModel adminValidate)
     {
         if (adminValidate == null) return new OperationResult(false, "Usuario administrador no encontrado.");
-        
+
         if (!adminValidate.Rol.Permisos.HasFlag(RolModel.PermisosSistema.CrearVenta))
         {
             return new OperationResult(false, "El usuario no tiene permisos para gestionar ventas.");
         }
-        
+
         return new OperationResult(true, " ");
     }
 
-    
+
+    public ObjectOperationResult SincronizarPagosConOrden(OrdenesModel orden)
+    {
+        decimal totalPagadoDivisa = 0;
+        foreach (var pago in orden.Pagos)
+        {
+            bool esBs = (int)pago.Metodo >= 1 && (int)pago.Metodo <= 4;
+            totalPagadoDivisa += esBs ? (pago.Monto / orden.TasaBcv) : pago.Monto;
+        }
+        if (Math.Round(totalPagadoDivisa, 2) >= Math.Round(orden.TotalDivisa, 2))
+            orden.Estado = OrdenesModel.EstadoPago.Pagado;
+        else if (totalPagadoDivisa > 0)
+            orden.Estado = OrdenesModel.EstadoPago.Parcial;
+        else
+            orden.Estado = OrdenesModel.EstadoPago.Pendiente;
+        return new ObjectOperationResult(true, "", orden);
+
+    }
 }

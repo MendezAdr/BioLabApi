@@ -21,7 +21,14 @@ public class AppDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
-        options.UseSqlite("Data Source = Laboratorio.Db")
+        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var folder = Path.Combine(appData, "Laboratorio.Db");
+        if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+        var dbPath = Path.Combine(folder, "Laboratorio.Db");
+
+
+
+        options.UseSqlite($"Data Source = {dbPath}")
         .ConfigureWarnings(warnings => warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
     }
 

@@ -157,7 +157,7 @@ private readonly AppDbContext _context;
             return new OperationResult(false, "Usuario administrador no encontrado.");
         }
         // Importante acomodar todos los permisos.
-        if (!adminValidate.Rol.Permisos.HasFlag(RolModel.PermisosSistema.ModificarPacientes))
+        if (!adminValidate.Rol.Permisos.HasFlag(RolModel.PermisosSistema.ModificarOrdenesYDetalles))
         {
             return new OperationResult(false, "El usuario no tiene permisos para modificar detalles.");
 

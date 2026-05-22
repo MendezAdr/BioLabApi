@@ -119,7 +119,7 @@ public class UsuarioService : IUsuarioService
     }
 
     // crear usuario
-    public async Task<OperationResult?> CreateUsuarioAsync(UsuarioModel usuario, int AdminId)
+    public async Task<OperationResult> CreateUsuarioAsync(UsuarioModel usuario, int AdminId)
     {;
         var validationResult = ValidateInputUserData(usuario, true);
         if (!validationResult.Success) return validationResult;
@@ -133,7 +133,7 @@ public class UsuarioService : IUsuarioService
             usuario.CreadoPorId = AdminId;
             usuario.ModificadoPorId = AdminId;
 
-            _context.Usuarios.AddAsync(usuario);
+            await _context.Usuarios.AddAsync(usuario);
             await _context.SaveChangesAsync();
             return new OperationResult(true, "Usuario creado con éxito.");
         }
@@ -144,7 +144,7 @@ public class UsuarioService : IUsuarioService
     }
     
     // actualizar usuario
-    public async Task<OperationResult?> UpdateUsuarioAsync(UsuarioModel usuario, int adminId)
+    public async Task<OperationResult> UpdateUsuarioAsync(UsuarioModel usuario, int adminId)
     {
         var adminValidate = await _context.Usuarios
             .Include(u => u.Rol)
@@ -206,8 +206,6 @@ public class UsuarioService : IUsuarioService
         {
             // En lugar de _context.Remove(usuario), cambiamos un estado
             usuario.IsActive = false;
-            usuario.FechaCreacion = DateTime.Now;
-            usuario.CreadoPorId = adminId;
             usuario.ModificadoPorId = adminId;
 
             // Si DE VERDAD quieres borrarlo físicamente (no recomendado):

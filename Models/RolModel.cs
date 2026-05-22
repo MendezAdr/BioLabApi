@@ -21,7 +21,9 @@ public class RolModel
         GestionarUsuarios = 4, 
         VerReportesAntiguos = 8,
         ModificarExamenes = 16,
-        ModificarPacientes = 32
+        ModificarPacientes = 32,
+        ModificarPagos = 64,
+        ModificarOrdenesYDetalles = 128,
 
     }
 }

@@ -17,7 +17,7 @@ public interface IPacientesService
     Task<OperationResult> CreateAsync(PacienteModel paciente, int userId);
     Task<OperationResult> UpdateAsync(PacienteModel paciente, int userId);
     Task<OperationResult> DeactivateAsync(int id, int adminId);
-    Task<OperationResult> ActivateAsync(int id, int adminId);
+    Task<OperationResult> ActivateAsync(int id, int adminId, bool state);
     
     
 }
