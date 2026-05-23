@@ -1,6 +1,3 @@
-// modelo de usuario
-using BioLabApi.Models;
-using System;
 
 namespace BioLabApi.Models;
 public class UsuarioModel : Auditable

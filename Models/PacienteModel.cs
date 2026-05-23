@@ -1,4 +1,3 @@
-// Models/Paciente.cs
 
 namespace BioLabApi.Models;
 public class PacienteModel : Auditable

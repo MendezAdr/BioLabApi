@@ -1,10 +1,6 @@
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using BioLabApi.Models;
 using BioLabApi.Data;
 using BioLabApi.Helpers;
-using Microsoft.Extensions.DependencyInjection;
 using BioLabApi.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 

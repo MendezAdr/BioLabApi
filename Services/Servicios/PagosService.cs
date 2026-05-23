@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using BioLabApi.Models;
 using BioLabApi.Services.Interfaces;
 using BioLabApi.Data;
@@ -18,7 +14,21 @@ public class PagosService : IPagosService
     {
         _dbContext = dbContext;
     }
+     //obtener todos los pagos
+    public async Task<ListOperationResult<PagosModel?>> GetAllPagosAsync()
+    {
+        try { 
+            var pagos = await _dbContext.Pagos
+                .AsNoTracking()
+                .ToListAsync();
+            return new ListOperationResult<PagosModel?> (true, "",  pagos );
 
+        }
+        catch (Exception ex)
+        {
+            return new ListOperationResult<PagosModel?> (  false,  $"Error al obtener los pagos: {ex.Message}",  null );
+        }
+    }
     //obtener un pago especifico
     public async Task<ObjectOperationResult> GetPagoByIdAsync(int id)
     {
@@ -267,4 +277,5 @@ public class PagosService : IPagosService
         return new ObjectOperationResult(true, "", orden);
 
     }
+
 }

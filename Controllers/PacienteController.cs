@@ -1,8 +1,7 @@
 ﻿using BioLabApi.Services.Interfaces;
 using BioLabApi.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics.Contracts;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
+
 
 namespace BioLabAPI.Controllers
 {
@@ -74,15 +73,15 @@ namespace BioLabAPI.Controllers
 
         //actualizar un paciente
         [HttpPatch("{id:int}/actualizar")]
-        public async Task<IActionResult> Update([FromBody] PacienteModel paciente, [FromQuery] int idPaciente)
+        public async Task<IActionResult> Update([FromBody] PacienteModel paciente, [FromRoute] int id)
         {
-            var result = await _pacienteService.UpdateAsync(paciente, idPaciente);
+            var result = await _pacienteService.UpdateAsync(paciente, id);
             if(!result.Success) return BadRequest(result);
             return Ok(result);
         }
 
         [HttpPatch("{id:int}/Desactivar")]
-        public async Task<IActionResult> Deactivate(int id, [FromQuery] int adminID)
+        public async Task<IActionResult> Deactivate(int id, [FromQuery] int adminID )
         {
             var result = await _pacienteService.DeactivateAsync(id, adminID);
             if (!result.Success) return BadRequest(result);
@@ -90,9 +89,9 @@ namespace BioLabAPI.Controllers
         }
 
         [HttpPatch("{id:int}/activar")]
-        public async Task<IActionResult> Activate(int id, [FromQuery] int adminID)
+        public async Task<IActionResult> Activate(int id, [FromQuery] int adminID, [FromQuery] bool State)
         {
-            var result = await _pacienteService.ActivateAsync(id, adminID);
+            var result = await _pacienteService.ActivateAsync(id, adminID, State);
             if (!result.Success) return BadRequest(result);
             return Ok(result);
         }

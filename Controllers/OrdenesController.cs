@@ -10,10 +10,7 @@ public class OrdenesController : ControllerBase
 {
     private readonly IOrdenesService _ordenesService;
 
-    public OrdenesController(IOrdenesService ordenesService)
-    {
-        _ordenesService = ordenesService;
-    }
+    public OrdenesController(IOrdenesService ordenesService) => _ordenesService = ordenesService;
 
     [HttpGet]
     public async Task<IActionResult> Get([FromHeader(Name = "X-Admin-Id")] int adminId)

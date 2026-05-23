@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using BioLabApi.Helpers;
 
 namespace BioLabApi.Services.Interfaces;
@@ -8,6 +5,7 @@ namespace BioLabApi.Services.Interfaces;
 public interface IPagosService
 {   
     //obtencion de pagos
+    Task<ListOperationResult<PagosModel?>> GetAllPagosAsync();
     Task<ObjectOperationResult> GetPagoByIdAsync(int id);
     Task<ListOperationResult<PagosModel>> GetPagosByMetodoAsync(int IdMetodo);
     Task<ListOperationResult<PagosModel>> GetPagosByOrdenAsync(int OrdenId);

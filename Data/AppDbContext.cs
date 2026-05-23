@@ -21,15 +21,18 @@ public class AppDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
-        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        var folder = Path.Combine(appData, "Laboratorio.Db");
-        if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
-        var dbPath = Path.Combine(folder, "Laboratorio.Db");
+        //var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        //var folder = Path.Combine(appData, "Laboratorio.Db");
+        //if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+        //var dbPath = Path.Combine(folder, "Laboratorio.Db");
 
 
 
-        options.UseSqlite($"Data Source = {dbPath}")
-        .ConfigureWarnings(warnings => warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+        //options.UseSqlite($"Data Source = {dbPath}")
+        //.ConfigureWarnings(warnings => warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
+
+        options.UseSqlite("Data Source=Laboratorio.db")
+            .ConfigureWarnings(warnings => warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -37,7 +40,22 @@ public class AppDbContext : DbContext
         // 1. Seeding de Roles
         // 2. Seeding de Usuario Administrador Inicial
 
-
+        modelBuilder.Entity<RolModel>().HasData(
+            new RolModel { Id = 1, RolName = "Admin" , Permisos = (RolModel.PermisosSistema)32 | (RolModel.PermisosSistema)4 | (RolModel.PermisosSistema)64 },
+            new RolModel { Id = 2, RolName = "Usuario" , Permisos = (RolModel.PermisosSistema)2 }
+        );
+        modelBuilder.Entity<UsuarioModel>().HasData(
+            new UsuarioModel
+            {
+                Id = 1,
+                Username = "admin",
+                Nombre = "Admin",
+                Apellido = "User",
+                Cedula = "00",
+                RolId = 1,
+                Contrasena = BCrypt.Net.BCrypt.HashPassword("admin123")
+            }
+        );
 
         // 3. Relación Orden -> Detalles (¡Solo una vez!)
         modelBuilder.Entity<DetalleModel>()

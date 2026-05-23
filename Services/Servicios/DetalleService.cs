@@ -1,14 +1,9 @@
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using BioLabApi.Models;
-using BioLabApi.Services;
 using BioLabApi.Data;
 using BioLabApi.Helpers;
-using Microsoft.Extensions.DependencyInjection;
 using BioLabApi.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
+
 
 namespace BioLabApi.Services.Servicios;
 
@@ -114,9 +109,9 @@ private readonly AppDbContext _context;
     }
 
     // actualiza un detalle
-    public async Task<OperationResult> UpdateDetalleAsync(DetalleModel detalle, int AdminId)
+    public async Task<OperationResult> UpdateDetalleAsync(DetalleModel detalle, int AdminId, int detalleId)
     {   
-        var DetalleExists = await _context.Detalles.AnyAsync(o => o.Id == detalle.Id);
+        var DetalleExists = await _context.Detalles.AnyAsync(o => o.Id == detalleId);
 
         if (!DetalleExists) return new OperationResult(false, "No existe un detalle con ese Id");
         var adminValidate = await _context.Usuarios

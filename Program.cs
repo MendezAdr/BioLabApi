@@ -1,7 +1,7 @@
 using BioLabApi.Data;
 using BioLabApi.Services.Interfaces;
 using BioLabApi.Services.Servicios;
-using Microsoft.EntityFrameworkCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
