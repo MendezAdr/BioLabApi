@@ -1,0 +1,39 @@
+﻿// DTOs/PagoCreateDTO.cs
+using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
+
+namespace BioLabApi.Models.DTOs
+{
+    // Heredamos de IValidatableObject para validaciones complejas cruzadas
+    public class PagoCreateDTO : IValidatableObject
+    {
+        // ELIMINAMOS OrdenId
+
+        [Required]
+        [Range(0.01, 9999999.99, ErrorMessage = "Inserte un monto válido mayor a cero en el pago.")]
+        public decimal Monto { get; set; }
+
+        [Required]
+        [Range(1, 6, ErrorMessage = "No puedes registrar un pago sin especificar un método válido.")]
+        public PagosModel.MetodoPago Metodo { get; set; }
+
+        [MaxLength(80)]
+        public string Referencia { get; set; } = string.Empty;
+
+        // Aquí ocurre la magia condicional
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            bool esPagoDigital = Metodo == PagosModel.MetodoPago.PagoMovil ||
+                                 Metodo == PagosModel.MetodoPago.Transferencia;
+
+            if (esPagoDigital && string.IsNullOrWhiteSpace(Referencia))
+            {
+                // Si falla, retornamos el error específicamente apuntando al campo "Referencia"
+                yield return new ValidationResult(
+                    "Los pagos digitales requieren una referencia obligatoria.",
+                    new[] { nameof(Referencia) }
+                );
+            }
+        }
+    }
+}

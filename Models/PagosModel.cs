@@ -1,5 +1,8 @@
 
 using BioLabApi.Models;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 public class PagosModel
 {
@@ -8,12 +11,19 @@ public class PagosModel
      * manera de "pagar" una orden, por lo tanto, cada pago
      * tendra solo un metodo de pago, un monto y una referencia (si aplica)
      */
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
+    [Required]
     public int OrdenId { get; set; } 
     public OrdenesModel Orden { get; set; } = null!;
 
+    [Required]
     public MetodoPago Metodo { get; set; }
-    public decimal Monto { get; set; } 
+    [Required]
+    public decimal Monto { get; set; }
+    [Required]
+    [MaxLength(80)]
     public string Referencia { get; set; } = string.Empty;
 
     public enum MetodoPago

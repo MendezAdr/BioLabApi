@@ -3,6 +3,7 @@ using BioLabApi.Data;
 using BioLabApi.Helpers;
 using BioLabApi.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using BioLabApi.Models.DTOs;
 
 
 namespace BioLabApi.Services.Servicios;
@@ -115,21 +116,29 @@ public class UsuarioService : IUsuarioService
     }
 
     // crear usuario
-    public async Task<OperationResult> CreateUsuarioAsync(UsuarioModel usuario, int AdminId)
+    public async Task<OperationResult> CreateUsuarioAsync(UsuarioCreateDTO usuario, int AdminId)
     {;
-        var validationResult = ValidateInputUserData(usuario, true);
-        if (!validationResult.Success) return validationResult;
+        
 
         bool validateExistence = await _context.Usuarios.AnyAsync(u => u.Username == usuario.Username);
         if (validateExistence) return new OperationResult ( false, "El nombre de usuario ya existe. Por favor, elige otro." );
 
         try
         {
-            usuario.FechaCreacion = DateTime.Now;
-            usuario.CreadoPorId = AdminId;
-            usuario.ModificadoPorId = AdminId;
 
-            await _context.Usuarios.AddAsync(usuario);
+            await _context.Usuarios.AddAsync(
+                new UsuarioModel
+                {
+                    Nombre = usuario.Nombre,
+                    Apellido = usuario.Apellido,
+                    Username = usuario.Username,
+                    Cedula = usuario.Cedula,
+                    Contrasena = HashPassword(usuario.Contrasena),
+                    FechaCreacion = DateTime.Now,
+                    CreadoPorId = AdminId,
+                    ModificadoPorId = AdminId,
+                    RolId = usuario.RolId
+                });
             await _context.SaveChangesAsync();
             return new OperationResult(true, "Usuario creado con éxito.");
         }
@@ -140,30 +149,30 @@ public class UsuarioService : IUsuarioService
     }
     
     // actualizar usuario
-    public async Task<OperationResult> UpdateUsuarioAsync(UsuarioModel usuario, int adminId)
+    public async Task<OperationResult> UpdateUsuarioAsync(UsuarioUpdateDTO usuario, int adminId)
     {
         var adminValidate = await _context.Usuarios
             .Include(u => u.Rol)
             .FirstOrDefaultAsync(u => u.Id == adminId);
 		
         var userDb = await _context.Usuarios.FirstOrDefaultAsync(u => u.Id == usuario.Id);
-        var validationResult = ValidateInputUserData(usuario);
+        
         var validatePermisos = ValidatePermisos(adminValidate);
 
 
-        if (!validationResult.Success) return validationResult;
+        
         if (userDb == null) return new OperationResult  (false,  "El usuario que intenta editar no existe." );
         if (!validatePermisos.Success) return validatePermisos;
 
         try
         {
-            userDb.Nombre = usuario.Nombre;
-            userDb.Apellido = usuario.Apellido;
-            userDb.Username = usuario.Username;
+            userDb.Nombre = usuario.Nombre.Trim();
+            userDb.Apellido = usuario.Apellido.Trim();
+            userDb.Username = usuario.Username.Trim();
+            userDb.Cedula = usuario.Cedula.Trim();
             userDb.RolId = usuario.RolId;
-            userDb.Cedula = usuario.Cedula;
 
-            userDb.FechaCreacion = DateTime.Now;
+            userDb.FechaModificacion = DateTime.Now;
             userDb.CreadoPorId = adminId;
             userDb.ModificadoPorId = adminId;
 
@@ -185,7 +194,7 @@ public class UsuarioService : IUsuarioService
         if (id == adminId)
             return new OperationResult(false, "No puedes desactivar tu propia cuenta.");
 
-        // 2. Validar permisos del que ejecuta
+        // 2. Validar permisos del que ejecuta_
         var admin = await _context.Usuarios
             .Include(u => u.Rol)
             .FirstOrDefaultAsync(u => u.Id == adminId);
@@ -279,31 +288,7 @@ public class UsuarioService : IUsuarioService
     
     //Metodos de uso multiple:
     
-    public OperationResult ValidateInputUserData(UsuarioModel user, bool isNewUser = false)
-    {
-        if (string.IsNullOrWhiteSpace(user.Nombre))
-        {
-            return new OperationResult (false, "El nombre de usuario no puede estar vacío." );
-        }
-
-
-        if (string.IsNullOrWhiteSpace(user.Username))
-        {
-            return new OperationResult(false, "El nombre de usuario no puede estar vacío.");
-        }
-
-        if (isNewUser && string.IsNullOrWhiteSpace(user.Contrasena))
-            return new OperationResult(false, "La contraseña es obligatoria para nuevos usuarios.");
-
-        if (user.RolId <= 0)
-        {
-            return new OperationResult(false, "Debe asignar un rol válido al usuario.");
-        }
-
-
-        return new OperationResult ( true, " "  );
-
-    }
+    
 
     //validar datos para actualizar usuario
 	

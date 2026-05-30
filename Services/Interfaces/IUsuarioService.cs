@@ -1,5 +1,6 @@
 using BioLabApi.Models;
 using BioLabApi.Helpers;
+using BioLabApi.Models.DTOs;
 
 
 namespace BioLabApi.Services.Interfaces;
@@ -10,9 +11,9 @@ public interface IUsuarioService
     
     Task<OperationResult?> LogOutAsync();
 
-    Task<OperationResult> CreateUsuarioAsync(UsuarioModel usuario, int adminId);
+    Task<OperationResult> CreateUsuarioAsync(UsuarioCreateDTO usuario, int adminId);
 
-    Task<OperationResult> UpdateUsuarioAsync(UsuarioModel usuario, int adminId);
+    Task<OperationResult> UpdateUsuarioAsync(UsuarioUpdateDTO usuario, int adminId);
 
     Task<OperationResult> ChangePasswordAsync(int usuarioId, string password, int adminId);
 

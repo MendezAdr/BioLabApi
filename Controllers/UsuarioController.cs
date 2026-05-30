@@ -2,6 +2,7 @@
 using BioLabApi.Services.Interfaces;
 using BioLabApi.Helpers;
 using Microsoft.AspNetCore.Mvc;
+using BioLabApi.Models.DTOs;
 
 
 namespace BioLabApi.Controllers;
@@ -31,11 +32,14 @@ public class UsuariosController : ControllerBase
 
         return Ok(result); // Devuelve el objeto Usuario con su Rol (RF-2)
     }
-
+        
     // RF-3: Registro de Usuarios
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] UsuarioModel nuevoUsuario, [FromQuery] int adminId)
+    public async Task<IActionResult> Create([FromBody] UsuarioCreateDTO nuevoUsuario, [FromQuery] int adminId)
     {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
         var result = await _usuarioService.CreateUsuarioAsync(nuevoUsuario, adminId);
 
         if (!result.Success)
@@ -114,8 +118,11 @@ public class UsuariosController : ControllerBase
     // =================================================
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateUser(int id, [FromBody] UsuarioModel usuario, [FromQuery] int adminId)
-    {
+    public async Task<IActionResult> UpdateUser(int id, [FromBody] UsuarioUpdateDTO usuario, [FromQuery] int adminId)
+    {   
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
         // Validación de seguridad: el ID de la URL debe coincidir con el del objeto
         if (id != usuario.Id)
             return BadRequest(new OperationResult(false, "El ID del usuario no coincide con la petición."));

@@ -3,6 +3,7 @@ using BioLabApi.Data;
 using BioLabApi.Helpers;
 using BioLabApi.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
+using BioLabApi.Models.DTOs;
 
 
 namespace BioLabApi.Services.Servicios;
@@ -90,14 +91,17 @@ private readonly AppDbContext _context;
 
 
     // crear un detalle
-    public async Task<OperationResult> CreateDetalleAsync(DetalleModel detalle)
+    public async Task<OperationResult> CreateDetalleAsync(DetalleCreateDTO detalle)
     {
-        var DetalleExists = await _context.Detalles.AnyAsync(o => o.Id == detalle.Id);
-        if (DetalleExists) return new OperationResult(false, "Ya existe un detalle con ese Id");
-
+                
         try
         {
-            _context.Detalles.Add(detalle);
+            _context.Detalles.Add(new DetalleModel
+            {
+                OrdenId = detalle.OrdenId,
+                ExamenId = detalle.ExamenId,
+                PrecioMomentoDivisa = detalle.PrecioMomentoDivisa
+            });
             await _context.SaveChangesAsync();
             return new OperationResult(true, "Detalle creado exitosamente");
         }
@@ -109,11 +113,12 @@ private readonly AppDbContext _context;
     }
 
     // actualiza un detalle
-    public async Task<OperationResult> UpdateDetalleAsync(DetalleModel detalle, int AdminId, int detalleId)
+    public async Task<OperationResult> UpdateDetalleAsync(DetalleUpdateDTO detalle, int AdminId, int detalleId)
     {   
         var DetalleExists = await _context.Detalles.AnyAsync(o => o.Id == detalleId);
 
         if (!DetalleExists) return new OperationResult(false, "No existe un detalle con ese Id");
+        
         var adminValidate = await _context.Usuarios
             .Include(u => u.Rol)
             .AsNoTracking()
@@ -122,7 +127,13 @@ private readonly AppDbContext _context;
         if (!permisosCheck.Success) return permisosCheck;
         try
         {
-            _context.Detalles.Update(detalle);
+            _context.Detalles.Update(new DetalleModel
+            {
+                Id = detalle.Id,
+                OrdenId = detalle.OrdenId,
+                ExamenId = detalle.ExamenId,
+                PrecioMomentoDivisa = detalle.PrecioMomentoDivisa
+            });
             await _context.SaveChangesAsync();
             return new OperationResult(true, "Detalle actualizado exitosamente");
         }
