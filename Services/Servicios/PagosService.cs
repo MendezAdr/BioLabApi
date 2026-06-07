@@ -3,6 +3,7 @@ using BioLabApi.Services.Interfaces;
 using BioLabApi.Data;
 using Microsoft.EntityFrameworkCore;
 using BioLabApi.Helpers;
+using BioLabApi.Models.DTOs;
 
 
 namespace BioLabApi.Services.Servicios;
@@ -15,18 +16,26 @@ public class PagosService : IPagosService
         _dbContext = dbContext;
     }
      //obtener todos los pagos
-    public async Task<ListOperationResult<PagosModel?>> GetAllPagosAsync()
+    public async Task<ListOperationResult<PagoResponseDTO?>> GetAllPagosAsync()
     {
         try { 
             var pagos = await _dbContext.Pagos
+                .Select(p => new PagoResponseDTO
+                {
+                    Id = p.Id,
+                    OrdenId = p.OrdenId,
+                    Metodo = p.Metodo,
+                    Monto = p.Monto,
+                    Referencia = p.Referencia
+                })
                 .AsNoTracking()
                 .ToListAsync();
-            return new ListOperationResult<PagosModel?> (true, "",  pagos );
+            return new ListOperationResult<PagoResponseDTO?> (true, "",  pagos );
 
         }
         catch (Exception ex)
         {
-            return new ListOperationResult<PagosModel?> (  false,  $"Error al obtener los pagos: {ex.Message}",  null );
+            return new ListOperationResult<PagoResponseDTO?> (  false,  $"Error al obtener los pagos: {ex.Message}",  null );
         }
     }
     //obtener un pago especifico
@@ -39,7 +48,14 @@ public class PagosService : IPagosService
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Id == id);
             if (pago == null) return new ObjectOperationResult(false, "Error, el pago buscado no existe", null);
-            return new ObjectOperationResult(true, "", pago);
+            return new ObjectOperationResult(true, "", new PagoResponseDTO
+            {
+                Id = pago.Id,
+                OrdenId = pago.OrdenId,
+                Metodo = pago.Metodo,
+                Monto = pago.Monto,
+                Referencia = pago.Referencia
+            });
         }
         catch (Exception e)
         {
@@ -56,7 +72,14 @@ public class PagosService : IPagosService
         if (pago == null) return new ObjectOperationResult(false, "Error, no existen pagos asociados a esa referencia", null);
         try
         {
-            return new ObjectOperationResult(true, "", pago);
+            return new ObjectOperationResult(true, "", new PagoResponseDTO
+            {
+                Id = pago.Id,
+                OrdenId = pago.OrdenId,
+                Metodo = pago.Metodo,
+                Monto = pago.Monto,
+                Referencia = pago.Referencia
+            });
         }
         catch (Exception e)
         {
@@ -66,26 +89,35 @@ public class PagosService : IPagosService
     }
 
     // obtener todos los pagos filtrados por metodo
-    public async Task<ListOperationResult<PagosModel>> GetPagosByMetodoAsync(int IdMetodo)
+    public async Task<ListOperationResult<PagoResponseDTO?>> GetPagosByMetodoAsync(int IdMetodo)
     {
         var listaPagos = await _dbContext.Pagos
             .Include(x => x.Orden)
             .AsNoTracking()
             .Where(p => p.Metodo.Equals(IdMetodo))
             .ToListAsync();
-        if (listaPagos == null) return new ListOperationResult<PagosModel>(false, "Error, aun no existen pagos por ese metodo", null);
+        if (listaPagos == null) return new ListOperationResult<PagoResponseDTO?>(false, "Error, aun no existen pagos por ese metodo", null);
         try
         {
-            return new ListOperationResult<PagosModel>(true, "", listaPagos);
+            var pagoResponses = listaPagos.Select(p => new PagoResponseDTO
+            {
+                Id = p.Id,
+                OrdenId = p.OrdenId,
+                Metodo = p.Metodo,
+                Monto = p.Monto,
+                Referencia = p.Referencia
+            }).ToList();
+
+            return new ListOperationResult<PagoResponseDTO?>(true, "", pagoResponses);
         }
         catch (Exception e)
         {
-            return new ListOperationResult<PagosModel>(false, $"Error: {e.Message} ", null);
+            return new ListOperationResult<PagoResponseDTO?>(false, $"Error: {e.Message} ", null);
         }
     }
 
     //obtener los pagos asociados a una orden
-    public async Task<ListOperationResult<PagosModel>> GetPagosByOrdenAsync(int OrdenId)
+    public async Task<ListOperationResult<PagoResponseDTO>> GetPagosByOrdenAsync(int OrdenId)
     {
         var listaPagos = await _dbContext.Pagos
             .Include(x => x.Orden)
@@ -96,19 +128,27 @@ public class PagosService : IPagosService
         {
             if (listaPagos == null)
             {
-                return new ListOperationResult<PagosModel>(false, "Error, no existen pagos asociados a esa orden", null);
+                return new ListOperationResult<PagoResponseDTO>(false, "Error, no existen pagos asociados a esa orden", null);
             }
-            return new ListOperationResult<PagosModel>(true, "", listaPagos);
+
+            var pagosResponseDTOs = listaPagos.Select(p => new PagoResponseDTO
+            {
+                Id = p.Id,
+                Monto = p.Monto,
+                Metodo = p.Metodo,
+                Referencia = p.Referencia
+            }).ToList();
+            return new ListOperationResult<PagoResponseDTO>(true, "", pagosResponseDTOs);
 
         }
         catch (Exception e)
         {
-            return new ListOperationResult<PagosModel>(false, $"Error: {e.Message} ", null);
+            return new ListOperationResult<PagoResponseDTO>(false, $"Error: {e.Message} ", null);
         }
     }
 
     //obtener los pagos entre dos fechas
-    public async Task<ListOperationResult<PagosModel>> GetAllPagosEntreFechasAsync(DateTime? fechaInicio, DateTime? fechaFin)
+    public async Task<ListOperationResult<PagoResponseDTO>> GetAllPagosEntreFechasAsync(DateTime? fechaInicio, DateTime? fechaFin)
     {
         var listaPagos = await _dbContext.Pagos
             .Include(x => x.Orden)
@@ -117,25 +157,38 @@ public class PagosService : IPagosService
             .ToListAsync();
         try
         {
-            return new ListOperationResult<PagosModel>(true, "", listaPagos);
+            var pagosResponseDTOs = listaPagos.Select(p => new PagoResponseDTO          
+            {
+                Id = p.Id,
+                Monto = p.Monto,
+                Metodo = p.Metodo,
+                Referencia = p.Referencia
+            }).ToList();
+
+            return new ListOperationResult<PagoResponseDTO>(true, "", pagosResponseDTOs);
         }
         catch (Exception e)
         {
-            return new ListOperationResult<PagosModel>(false, $"Error: {e.Message} ", null);
+            return new ListOperationResult<PagoResponseDTO>(false, $"Error: {e.Message} ", null);
         }
     }
 
 
     //metodos restantes
-    public async Task<OperationResult> CreatePagoAsync(PagosModel pago)
+    public async Task<OperationResult> CreatePagoAsync(PagoCreateDTO pago)
     {
-        var validPago = validatePago(pago);
-        if (!validPago.Success) return validPago;
+        using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
         try
         {
             // Agregamos el pago
-            await _dbContext.Pagos.AddAsync(pago);
+            await _dbContext.Pagos.AddAsync(new PagosModel
+            {
+                OrdenId = pago.OrdenId,
+                Monto = pago.Monto,
+                Referencia = pago.Referencia,
+                Metodo = pago.Metodo
+            });
 
             // CRÍTICO: Necesitamos cargar la orden y TODOS sus pagos (incluyendo el nuevo) para recalcular
             var orden = await _dbContext.Ordenes
@@ -148,6 +201,7 @@ public class PagosService : IPagosService
             }
 
             await _dbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
             return new OperationResult(true, "Pago registrado y orden sincronizada con éxito.");
         }
         catch (Exception e)
@@ -156,14 +210,16 @@ public class PagosService : IPagosService
         }
     }
 
-    public async Task<OperationResult> UpdatePagoAsync(PagosModel pago, int adminId)
+    public async Task<OperationResult> UpdatePagoAsync(PagoUpdateDTO pago, int adminId)
     {
-        var admin = await _dbContext.Usuarios.AsNoTracking().Include(u => u.Rol).FirstOrDefaultAsync(u => u.Id == adminId);
+        var admin = await _dbContext.Usuarios
+            .AsNoTracking()
+            .Include(u => u.Rol)
+            .FirstOrDefaultAsync(u => u.Id == adminId);
+
         var validPermisos = ValidatePermisos(admin);
         if (!validPermisos.Success) return validPermisos;
 
-        var validPago = validatePago(pago);
-        if (!validPago.Success) return validPago;
 
         // Búsqueda del pago INCLUYENDO la orden y todos los pagos hermanos
         var pagoDb = await _dbContext.Pagos
@@ -173,6 +229,7 @@ public class PagosService : IPagosService
 
         if (pagoDb == null) return new OperationResult(false, "El pago no existe.");
 
+        using var transaction = await _dbContext.Database.BeginTransactionAsync();
         try
         {
             // Actualización quirúrgica
@@ -184,6 +241,7 @@ public class PagosService : IPagosService
             SincronizarPagosConOrden(pagoDb.Orden);
 
             await _dbContext.SaveChangesAsync();
+            await transaction.CommitAsync();
             return new OperationResult(true, "Pago actualizado y orden recalculada con éxito.");
         }
         catch (Exception e)

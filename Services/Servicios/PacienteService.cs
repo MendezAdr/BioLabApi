@@ -1,6 +1,7 @@
 using BioLabApi.Data;
 using BioLabApi.Helpers;
 using BioLabApi.Models;
+using BioLabApi.Models.DTOs;
 using BioLabApi.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,15 +18,28 @@ public class PacienteService : IPacientesService
     }
 
     //retorna una lista de pacientes
-    public async Task<ListOperationResult<PacienteModel>> GetAllPacientesAsync()
+    public async Task<ListOperationResult<PacienteResponseDTO>> GetAllPacientesAsync()
     {
         try
         {
-            return new ListOperationResult<PacienteModel>(true, "Pacientes obtenidos correctamente.", await _appDbContext.Pacientes.ToListAsync());
+            return new ListOperationResult<PacienteResponseDTO>(true, "Pacientes obtenidos correctamente.", await _appDbContext.Pacientes.Select(p => new PacienteResponseDTO
+            {
+                Id = p.Id,
+                Nombre = p.Nombre,
+                Apellido = p.Apellido,
+                Cedula = p.Cedula,
+                Telefono = p.Telefono,
+                FechaNacimiento = p.FechaNacimiento,
+                Sexo = p.Sexo,
+                Direccion = p.Direccion,
+                NombreAcompañante = p.NombreAcompañante,
+                CedulaAcompañante = p.CedulaAcompañante
+       
+            })  .ToListAsync());
         }
         catch (Exception ex)
         {
-            return new ListOperationResult<PacienteModel>(false, $"Error al obtener pacientes: {ex.Message}", null);
+            return new ListOperationResult<PacienteResponseDTO>(false, $"Error al obtener pacientes: {ex.Message}", null);
         }
     }
 
@@ -35,8 +49,22 @@ public class PacienteService : IPacientesService
         try
         {
             var paciente = await _appDbContext.Pacientes
+                .Select(p => new PacienteResponseDTO
+                {
+                    Id = p.Id,
+                    Nombre = p.Nombre,
+                    Apellido = p.Apellido,
+                    Cedula = p.Cedula,
+                    Telefono = p.Telefono,
+                    FechaNacimiento = p.FechaNacimiento,
+                    Sexo = p.Sexo,
+                    Direccion = p.Direccion,
+                    NombreAcompañante = p.NombreAcompañante,
+                    CedulaAcompañante = p.CedulaAcompañante
+                })
                 .AsNoTracking()
-                .FirstOrDefaultAsync(p => p.Id == id);
+                .FirstOrDefaultAsync(p => p.Id == id)
+                ;
             if (paciente == null) return new ObjectOperationResult(false, "Paciente no encontrado.", null);
             
 
@@ -57,6 +85,19 @@ public class PacienteService : IPacientesService
             var paciente = await _appDbContext.Pacientes
                 .AsNoTracking()
                 .Where(p => p.Nombre.ToLower().Contains(nombre.Trim().ToLower()))
+                .Select(p => new PacienteResponseDTO
+                {
+                    Id = p.Id,
+                    Nombre = p.Nombre,
+                    Apellido = p.Apellido,
+                    Cedula = p.Cedula,
+                    Telefono = p.Telefono,
+                    FechaNacimiento = p.FechaNacimiento,
+                    Sexo = p.Sexo,
+                    Direccion = p.Direccion,
+                    NombreAcompañante = p.NombreAcompañante,
+                    CedulaAcompañante = p.CedulaAcompañante
+                })
                 .FirstOrDefaultAsync();
             if (paciente == null) return new ObjectOperationResult(false, "Paciente no encontrado.", null);
 
@@ -76,6 +117,19 @@ public class PacienteService : IPacientesService
             var paciente = await _appDbContext.Pacientes
                 .AsNoTracking()
                 .Where(p => p.Apellido.ToLower().Contains(apellido.Trim().ToLower()))
+                .Select(p => new PacienteResponseDTO
+                {
+                    Id = p.Id,
+                    Nombre = p.Nombre,
+                    Apellido = p.Apellido,
+                    Cedula = p.Cedula,
+                    Telefono = p.Telefono,
+                    FechaNacimiento = p.FechaNacimiento,
+                    Sexo = p.Sexo,
+                    Direccion = p.Direccion,
+                    NombreAcompañante = p.NombreAcompañante,
+                    CedulaAcompañante = p.CedulaAcompañante
+                })
                 .FirstOrDefaultAsync();
             if (paciente == null) return new ObjectOperationResult(false, "Paciente no encontrado.", null);
 
@@ -94,6 +148,19 @@ public class PacienteService : IPacientesService
         {
 
             var paciente = await _appDbContext.Pacientes
+                .Select(p => new PacienteResponseDTO
+                {
+                    Id = p.Id,
+                    Nombre = p.Nombre,
+                    Apellido = p.Apellido,
+                    Cedula = p.Cedula,
+                    Telefono = p.Telefono,
+                    FechaNacimiento = p.FechaNacimiento,
+                    Sexo = p.Sexo,
+                    Direccion = p.Direccion,
+                    NombreAcompañante = p.NombreAcompañante,
+                    CedulaAcompañante = p.CedulaAcompañante
+                })
                 .AsNoTracking()
                 .FirstOrDefaultAsync(p => p.Cedula == cedula);
             if (paciente == null) return new ObjectOperationResult(false, "Paciente no encontrado.", null);
@@ -111,14 +178,9 @@ public class PacienteService : IPacientesService
     //genericos
 
     //crea un paciente nuevo
-    public async Task<OperationResult> CreateAsync(PacienteModel paciente, int userId)
+    public async Task<OperationResult> CreateAsync(PacienteCreateDTO paciente, int userId)
     {
-        var validationResult = ValidateInputUserData(paciente);
-
-        if (!validationResult.Success)
-        {
-            return validationResult;
-        }
+        
         if (await _appDbContext.Pacientes.AnyAsync(p => p.Cedula == paciente.Cedula))
         {
             return new OperationResult(false, "Ya existe un paciente con la misma cédula.");
@@ -126,16 +188,23 @@ public class PacienteService : IPacientesService
 
         try
         {
-            paciente.CreadoPorId = userId;
-            paciente.ModificadoPorId = userId;
-            paciente.FechaCreacion = DateTime.Now;
-            paciente.FechaModificacion = DateTime.Now;
-
-            paciente.Nombre = paciente.Nombre.Trim();
-            paciente.Apellido = paciente.Apellido.Trim();
-            paciente.Cedula = paciente.Cedula.Trim();
-
-            await _appDbContext.Pacientes.AddAsync(paciente);
+            
+            await _appDbContext.Pacientes.AddAsync(new PacienteModel
+            {
+                Nombre = paciente.Nombre.Trim(),
+                Apellido = paciente.Apellido.Trim(),
+                Cedula = paciente.Cedula.Trim(),
+                Telefono = paciente.Telefono?.Trim() ,
+                Direccion = paciente.Direccion?.Trim(),
+                FechaNacimiento = paciente.FechaNacimiento,
+                Sexo = paciente.Sexo.Trim(),
+                NombreAcompañante = paciente.NombreAcompañante?.Trim(),
+                CedulaAcompañante = paciente.CedulaAcompañante?.Trim(),
+                CreadoPorId = userId,
+                ModificadoPorId = userId,
+                FechaCreacion = DateTime.Now,
+                FechaModificacion = DateTime.Now
+            });
             await _appDbContext.SaveChangesAsync();
             return new OperationResult(true, "Paciente creado correctamente.");
         }
@@ -147,14 +216,8 @@ public class PacienteService : IPacientesService
     }
 
     //actualiza un paciente existente
-    public async Task<OperationResult> UpdateAsync(PacienteModel paciente, int userId)
+    public async Task<OperationResult> UpdateAsync(PacienteUpdateDTO paciente, int userId)
     {
-        var validationResult = ValidateInputUserData(paciente);
-
-        if (!validationResult.Success)
-        {
-            return validationResult;
-        }
         
         var pacienteDb = await _appDbContext.Pacientes.FindAsync(paciente.Id);
         if (pacienteDb == null)
@@ -175,6 +238,10 @@ public class PacienteService : IPacientesService
                 p.FechaModificacion = DateTime.Now;
                 p.Telefono = string.IsNullOrWhiteSpace(paciente.Telefono) ? "N/A" : paciente.Telefono.Trim();
                 p.Direccion = string.IsNullOrWhiteSpace(paciente.Direccion) ? "N/A" : paciente.Direccion.Trim();
+                p.FechaNacimiento = paciente.FechaNacimiento;
+                p.Sexo = paciente.Sexo.Trim();
+                p.NombreAcompañante = paciente.NombreAcompañante?.Trim();
+                p.CedulaAcompañante = paciente.CedulaAcompañante?.Trim(); p.ModificadoPorId = userId;
             });
             await _appDbContext.SaveChangesAsync();
 
@@ -233,38 +300,7 @@ public class PacienteService : IPacientesService
     }
 
 
-    public OperationResult ValidateInputUserData(PacienteModel paciente)
-    {
-        if (string.IsNullOrWhiteSpace(paciente.Nombre))
-        {
-            return new OperationResult(false, "El nombre del paciente no puede estar vacío.");
-        }
-
-
-        if (string.IsNullOrWhiteSpace(paciente.Apellido))
-        {
-            return new OperationResult(false, "El apellido del paciente no puede estar vacío.");
-        }
-
-
-        if (string.IsNullOrWhiteSpace(paciente.Cedula))
-        {
-            return new OperationResult(false, "La cédula del paciente no puede estar vacía.");
-        }
-
-        if (string.IsNullOrWhiteSpace(paciente.Telefono))
-        {
-            paciente.Telefono = "N/A";
-        }
-
-        if (string.IsNullOrWhiteSpace(paciente.Direccion))
-        {
-            paciente.Direccion = "N/A";
-        }
-        
-        return new OperationResult(true, " ");
-
-    }
+   
 
     //validar datos para actualizar paciente
     public OperationResult ValidatePermisos(UsuarioModel adminValidate)

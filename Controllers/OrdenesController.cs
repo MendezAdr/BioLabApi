@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BioLabApi.Models;
 using BioLabApi.Services.Interfaces;
+using BioLabApi.Models.DTOs;
 
 namespace BioLabApi.Controllers;
 
@@ -55,7 +56,7 @@ public class OrdenesController : ControllerBase
 
     // RF-15: Procesar una nueva venta/orden completa
     [HttpPost]
-    public async Task<IActionResult> Create([FromHeader(Name = "X-Usuario-Id")] int usuarioId, [FromBody] OrdenesModel nuevaOrden)
+    public async Task<IActionResult> Create([FromHeader(Name = "X-Usuario-Id")] int usuarioId, [FromBody] OrdenCreateDTO nuevaOrden)
     {
         var result = await _ordenesService.CreateOrdenAsync(nuevaOrden, usuarioId);
         if (!result.Success) return BadRequest(result);
@@ -72,7 +73,7 @@ public class OrdenesController : ControllerBase
     }
 
     [HttpPut("{id}/actualizar")]
-    public async Task<IActionResult> Update([FromRoute] int id, [FromBody] OrdenesModel ordenActualizada, [FromHeader(Name = "X-Admin-Id")] int adminId)
+    public async Task<IActionResult> Update([FromRoute] int id, [FromBody] OrdenUpdateDTO ordenActualizada, [FromHeader(Name = "X-Admin-Id")] int adminId)
     {
         var result = await _ordenesService.UpdateOrdenAsync(id, ordenActualizada, adminId);
         if (!result.Success) return BadRequest(result);

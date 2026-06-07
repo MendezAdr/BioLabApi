@@ -1,5 +1,7 @@
 ﻿using BioLabApi.Services.Interfaces;
+using BioLabApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using BioLabApi.Models.DTOs;
 
 namespace BioLabAPI.Controllers
 {
@@ -66,7 +68,7 @@ namespace BioLabAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] PagosModel pago)
+        public async Task<IActionResult> Create([FromBody] PagoCreateDTO pago)
         {
             var result = await _pagosService.CreatePagoAsync(pago);
             if (!result.Success) return NotFound(result);
@@ -75,7 +77,7 @@ namespace BioLabAPI.Controllers
 
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] PagosModel pago)
+        public async Task<IActionResult> Update(int id, [FromBody] PagoUpdateDTO pago)
         {
             var result = await _pagosService.UpdatePagoAsync(pago, id);
             if (!result.Success) return NotFound(result);

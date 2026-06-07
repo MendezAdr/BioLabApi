@@ -1,6 +1,7 @@
 ﻿using BioLabApi.Services.Interfaces;
 using BioLabApi.Models;
 using Microsoft.AspNetCore.Mvc;
+using BioLabApi.Models.DTOs;
 
 
 namespace BioLabAPI.Controllers
@@ -63,7 +64,7 @@ namespace BioLabAPI.Controllers
 
         // crear un paciente
         [HttpPost()]
-        public async Task<IActionResult> Create([FromBody] PacienteModel paciente, [FromQuery] int UserId)
+        public async Task<IActionResult> Create([FromBody] PacienteCreateDTO paciente, [FromQuery] int UserId)
         {
             var result = await _pacienteService.CreateAsync(paciente, UserId);
             if (!result.Success) { return BadRequest(result); }
@@ -73,7 +74,7 @@ namespace BioLabAPI.Controllers
 
         //actualizar un paciente
         [HttpPatch("{id:int}/actualizar")]
-        public async Task<IActionResult> Update([FromBody] PacienteModel paciente, [FromRoute] int id)
+        public async Task<IActionResult> Update([FromBody] PacienteUpdateDTO paciente, [FromRoute] int id)
         {
             var result = await _pacienteService.UpdateAsync(paciente, id);
             if(!result.Success) return BadRequest(result);

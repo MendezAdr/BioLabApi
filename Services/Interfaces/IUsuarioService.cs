@@ -23,7 +23,7 @@ public interface IUsuarioService
 
     Task<ObjectOperationResult> GetUserByIdAsync(int id, int adminId);
 
-    Task<ListOperationResult<UsuarioModel>> GetAllUsuariosAsync(int adminId);
+    Task<ListOperationResult<UsuarioResponseDTO>> GetAllUsuariosAsync(int adminId);
 
 
 }

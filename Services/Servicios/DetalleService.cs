@@ -30,7 +30,13 @@ private readonly AppDbContext _context;
                 .AsNoTracking()
                 .FirstOrDefaultAsync(e => e.Id == id);
             if (Detalle == null) return new ObjectOperationResult(false, "El detalle asociado al Id no existe", null);
-            return new ObjectOperationResult(true, "", Detalle);
+            return new ObjectOperationResult(true, "", new DetalleResponseDTO
+            {
+                Id = Detalle.Id,
+                OrdenId = Detalle.OrdenId,
+                ExamenId = Detalle.ExamenId,
+                PrecioMomentoDivisa = Detalle.PrecioMomentoDivisa
+            });
                     
         }
         catch (Exception ex)
@@ -41,7 +47,7 @@ private readonly AppDbContext _context;
     }
 
     // Obtener una lista de detalles por el id de la orden
-    public async Task<ListOperationResult<DetalleModel>> GetDetallesByOrdenIdAsync(int oid)
+    public async Task<ListOperationResult<DetalleResponseDTO>> GetDetallesByOrdenIdAsync(int oid)
     {
         try
         {
@@ -49,17 +55,23 @@ private readonly AppDbContext _context;
                 .Include(x => x.Orden)
                 .AsNoTracking()
                 .Where(e => e.OrdenId == oid)
+                .Select(d => new DetalleResponseDTO
+                {
+                    Id = d.Id,
+                    OrdenId = d.OrdenId,
+                    ExamenId = d.ExamenId,
+                    PrecioMomentoDivisa = d.PrecioMomentoDivisa
+                })
                 .ToListAsync();
 
 
-            if (DetalleList == null) return new ListOperationResult<DetalleModel>(false, "No existe ningun detalle asociado a esa orden", null);
+            if (DetalleList == null) return new ListOperationResult<DetalleResponseDTO>(false, "No existe ningun detalle asociado a esa orden", null);
 
-            return new ListOperationResult<DetalleModel>(true, "", DetalleList);
+            return new ListOperationResult<DetalleResponseDTO>(true, "", DetalleList);
 
         }
-        catch (Exception ex) 
-        {
-            return new ListOperationResult<DetalleModel>(false, $"Error: {ex.Message}", null);
+        catch (Exception ex) {  
+            return new ListOperationResult<DetalleResponseDTO>(false, $"Error: {ex.Message}", null);
 
         }
 
@@ -78,7 +90,13 @@ private readonly AppDbContext _context;
 
             if (DetalleList == null) return new ObjectOperationResult(false, "No existe ningun detalle asociado a ese Examen", null);
 
-            return new ObjectOperationResult(true, "", DetalleList);
+            return new ObjectOperationResult(true, "", new DetalleResponseDTO
+            {
+                Id = DetalleList.Id,
+                OrdenId = DetalleList.OrdenId,
+                ExamenId = DetalleList.ExamenId,
+                PrecioMomentoDivisa = DetalleList.PrecioMomentoDivisa
+            });
 
         }
         catch (Exception ex)
@@ -98,7 +116,6 @@ private readonly AppDbContext _context;
         {
             _context.Detalles.Add(new DetalleModel
             {
-                OrdenId = detalle.OrdenId,
                 ExamenId = detalle.ExamenId,
                 PrecioMomentoDivisa = detalle.PrecioMomentoDivisa
             });

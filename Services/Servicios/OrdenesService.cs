@@ -37,7 +37,29 @@ public class OrdenesService : IOrdenesService
             if (orden == null)
                 return new ObjectOperationResult(false, "La orden no existe.", null);
 
-            return new ObjectOperationResult(true, " ", orden);
+            return new ObjectOperationResult(true, " ", new OrdenResponseDTO
+            {
+                Id = orden.Id,
+                PacienteId = orden.PacienteId,
+                FechaOrden = orden.Fecha,
+                Estado = orden.Estado,
+                NumeroFactura = orden.NumeroFactura,
+                TotalDivisa = orden.TotalDivisa,
+                Detalles = new List<DetalleResponseDTO>(orden.Detalles.Select(d => new DetalleResponseDTO
+                {
+                    Id = d.Id,
+                    ExamenId = d.ExamenId,
+                    PrecioMomentoDivisa = d.PrecioMomentoDivisa
+                })),
+                Pagos = new List<PagoResponseDTO>(orden.Pagos.Select(p => new PagoResponseDTO
+                {
+                    Id = p.Id,
+                    Metodo = p.Metodo,
+                    Monto = p.Monto,
+                    referencia = p.Referencia
+                }))
+
+            });
         }
         catch (Exception ex)
         {
@@ -45,7 +67,7 @@ public class OrdenesService : IOrdenesService
         }
     }
 
-    public async Task<ListOperationResult<OrdenesModel>> GetAllOrdenesAsync(int AdminId)
+    public async Task<ListOperationResult<OrdenResponseDTO>> GetAllOrdenesAsync(int AdminId)
     {
         try
         {
@@ -54,23 +76,45 @@ public class OrdenesService : IOrdenesService
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Id == AdminId);
             var validacion = ValidatePermisos(admin);
-            if (!validacion.Success) return new ListOperationResult<OrdenesModel>(false, validacion.Message, null);
+            if (!validacion.Success) return new ListOperationResult<OrdenResponseDTO>(false, validacion.Message, null);
 
             var lista = await _context.Ordenes
                 .Include(o => o.Paciente)
                 .OrderByDescending(o => o.Fecha)
                 .AsNoTracking()
+                .Select(o => new OrdenResponseDTO
+                {
+                    Id = o.Id,
+                    PacienteId = o.PacienteId,
+                    FechaOrden = o.Fecha,
+                    Estado = o.Estado,
+                    NumeroFactura = o.NumeroFactura,
+                    TotalDivisa = o.TotalDivisa,
+                    Detalles = new List<DetalleResponseDTO>(o.Detalles.Select(d => new DetalleResponseDTO
+                    {
+                        Id = d.Id,
+                        ExamenId = d.ExamenId,
+                        PrecioMomentoDivisa = d.PrecioMomentoDivisa
+                    })),
+                    Pagos = new List<PagoResponseDTO>(o.Pagos.Select(p => new PagoResponseDTO
+                    {
+                        Id = p.Id,
+                        Metodo = p.Metodo,
+                        Monto = p.Monto,
+                        referencia = p.Referencia
+                    }))
+                })
                 .ToListAsync();
 
-            return new ListOperationResult<OrdenesModel>(true, " ", lista);
+            return new ListOperationResult<OrdenResponseDTO>(true, " ", lista);
         }
         catch (Exception ex)
         {
-            return new ListOperationResult<OrdenesModel>(false, $"Error: {ex.Message}", null);
+            return new ListOperationResult<OrdenResponseDTO>(false, $"Error: {ex.Message}", null);
         }
     }
 
-    public async Task<ListOperationResult<OrdenesModel>> GetAllOrdenesEntreFechasAsync(DateTime inicio, DateTime fin, int AdminId)
+    public async Task<ListOperationResult<OrdenResponseDTO>> GetAllOrdenesEntreFechasAsync(DateTime inicio, DateTime fin, int AdminId)
     {
         try
         {
@@ -79,55 +123,121 @@ public class OrdenesService : IOrdenesService
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Id == AdminId);
             var validacion = ValidatePermisos(admin);
-            if (!validacion.Success) return new ListOperationResult<OrdenesModel>(false, validacion.Message, null);
+            if (!validacion.Success) return new ListOperationResult<OrdenResponseDTO>(false, validacion.Message, null);
 
             var lista = await _context.Ordenes
                 .Include(o => o.Paciente)
                 .Where(o => o.Fecha.Date >= inicio.Date && o.Fecha.Date <= fin.Date)
+                .Select(o => new OrdenResponseDTO
+                {
+                    Id = o.Id,
+                    PacienteId = o.PacienteId,
+                    FechaOrden = o.Fecha,
+                    Estado = o.Estado,
+                    NumeroFactura = o.NumeroFactura,
+                    TotalDivisa = o.TotalDivisa,
+                    Detalles = new List<DetalleResponseDTO>(o.Detalles.Select(d => new DetalleResponseDTO
+                    {
+                        Id = d.Id,
+                        ExamenId = d.ExamenId,
+                        PrecioMomentoDivisa = d.PrecioMomentoDivisa
+                    })),
+                    Pagos = new List<PagoResponseDTO>(o.Pagos.Select(p => new PagoResponseDTO
+                    {
+                        Id = p.Id,
+                        Metodo = p.Metodo,
+                        Monto = p.Monto,
+                        referencia = p.Referencia
+                    }))
+                })
                 .AsNoTracking()
                 .ToListAsync();
 
-            return new ListOperationResult<OrdenesModel>(true, "Búsqueda finalizada.", lista);
+            return new ListOperationResult<OrdenResponseDTO>(true, "Búsqueda finalizada.", lista);
         }
         catch (Exception ex)
         {
-            return new ListOperationResult<OrdenesModel>(false, $"Error: {ex.Message}", null);
+            return new ListOperationResult<OrdenResponseDTO>(false, $"Error: {ex.Message}", null);
         }
     }
 
-    public async Task<ListOperationResult<OrdenesModel>> GetAllOrdenesByPacienteAsync(int idPaciente, int AdminId)
+    public async Task<ListOperationResult<OrdenResponseDTO>> GetAllOrdenesByPacienteAsync(int idPaciente, int AdminId)
     {
         var admin = await _context.Usuarios
                 .Include(u => u.Rol)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Id == AdminId);
         var validacion = ValidatePermisos(admin);
-        if (!validacion.Success) return new ListOperationResult<OrdenesModel>(false, validacion.Message, null);
+        if (!validacion.Success) return new ListOperationResult<OrdenResponseDTO>(false, validacion.Message, null);
 
         var lista = await _context.Ordenes
             .Where(o => o.PacienteId == idPaciente)
             .Include(o => o.Paciente)
+            .Select(o => new OrdenResponseDTO
+            {
+                Id = o.Id,
+                PacienteId = o.PacienteId,
+                FechaOrden = o.Fecha,
+                Estado = o.Estado,
+                NumeroFactura = o.NumeroFactura,
+                TotalDivisa = o.TotalDivisa,
+                Detalles = new List<DetalleResponseDTO>(o.Detalles.Select(d => new DetalleResponseDTO
+                {
+                    Id = d.Id,
+                    ExamenId = d.ExamenId,
+                    PrecioMomentoDivisa = d.PrecioMomentoDivisa
+                })),
+                Pagos = new List<PagoResponseDTO>(o.Pagos.Select(p => new PagoResponseDTO
+                {
+                    Id = p.Id,
+                    Metodo = p.Metodo,
+                    Monto = p.Monto,
+                    referencia = p.Referencia
+                }))
+            })
             .AsNoTracking()
             .ToListAsync();
-        return new ListOperationResult<OrdenesModel>(true, "", lista);
+        return new ListOperationResult<OrdenResponseDTO>(true, "", lista);
     }
 
     ///muy importante, verificar la transformacion de estado!!! y revisar el controlador tambien
-    public async Task<ListOperationResult<OrdenesModel>> GetAllOrdenesByEstadoAsync(OrdenesModel.EstadoPago estado, int AdminId)
+    public async Task<ListOperationResult<OrdenResponseDTO>> GetAllOrdenesByEstadoAsync(OrdenesModel.EstadoPago estado, int AdminId)
     {
         var admin = await _context.Usuarios
                 .Include(u => u.Rol)
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Id == AdminId);
         var validacion = ValidatePermisos(admin);
-        if (!validacion.Success) return new ListOperationResult<OrdenesModel>(false, validacion.Message, null);
+        if (!validacion.Success) return new ListOperationResult<OrdenResponseDTO>(false, validacion.Message, null);
 
         var lista = await _context.Ordenes
             .Where(o => o.Estado == estado)
             .Include(o => o.Paciente)
+            .Select(o => new OrdenResponseDTO
+            {
+                Id = o.Id,
+                PacienteId = o.PacienteId,
+                FechaOrden = o.Fecha,
+                Estado = o.Estado,
+                NumeroFactura = o.NumeroFactura,
+                TotalDivisa = o.TotalDivisa,
+                Detalles = new List<DetalleResponseDTO>(o.Detalles.Select(d => new DetalleResponseDTO
+                {
+                    Id = d.Id,
+                    ExamenId = d.ExamenId,
+                    PrecioMomentoDivisa = d.PrecioMomentoDivisa
+                })),
+                Pagos = new List<PagoResponseDTO>(o.Pagos.Select(p => new PagoResponseDTO
+                {
+                    Id = p.Id,
+                    Metodo = p.Metodo,
+                    Monto = p.Monto,
+                    referencia = p.Referencia
+                }))
+            })
             .AsNoTracking()
             .ToListAsync();
-        return new ListOperationResult<OrdenesModel>(true, "", lista);
+        return new ListOperationResult<OrdenResponseDTO>(true, "", lista);
     }
 
     
@@ -215,8 +325,7 @@ public class OrdenesService : IOrdenesService
         }
     }
 
-    // Recuerda actualizar la firma en la interfaz IOrdenesService:
-    // Task<OperationResult> UpdateOrdenAsync(int id, OrdenUpdateDTO ordenDto, int usuarioId);
+ 
 
     public async Task<OperationResult> UpdateOrdenAsync(int id, OrdenUpdateDTO ordenDto, int usuarioId)
     {

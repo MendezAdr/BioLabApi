@@ -107,7 +107,16 @@ public class UsuarioService : IUsuarioService
                 .FirstOrDefaultAsync(u => u.Id == id);
             if (User == null) return new ObjectOperationResult(false, "El usuario solicitado no existe.", null);
 			
-            return new ObjectOperationResult(true, "",  User);
+            return new ObjectOperationResult(true, "",  new UsuarioResponseDTO
+            {
+                Id = User.Id,
+                Username = User.Username,
+                Nombre = User.Nombre,
+                Apellido = User.Apellido,
+                Cedula = User.Cedula,
+                RolName = User.Rol.RolName,
+                IsActive = User.IsActive
+            });
         }
         catch (Exception e)
         {
@@ -258,7 +267,7 @@ public class UsuarioService : IUsuarioService
     
     // Obtener una lista con todos los usuarios
 
-    public async Task<ListOperationResult<UsuarioModel>> GetAllUsuariosAsync(int adminId)
+    public async Task<ListOperationResult<UsuarioResponseDTO>> GetAllUsuariosAsync(int adminId)
     {
         var adminValidate = await _context.Usuarios
             .Include(u => u.Rol)
@@ -267,20 +276,31 @@ public class UsuarioService : IUsuarioService
         var Permisos = ValidatePermisos(adminValidate);
 
         if (!Permisos.Success)
-            return new ListOperationResult<UsuarioModel>(false, "No tiene los permisos necesarios", null);
+            return new ListOperationResult<UsuarioResponseDTO>(false, "No tiene los permisos necesarios", null);
 
         try
         {
-            var UserList = await _context.Usuarios.Include(u => u.Rol)
+            var UserList = await _context.Usuarios
+                .Include(u => u.Rol)
                 .AsNoTracking()
+                .Select( u => new UsuarioResponseDTO
+                {
+                    Id = u.Id,
+                    Username = u.Username,
+                    Nombre = u.Nombre,
+                    Apellido = u.Apellido,
+                    Cedula = u.Cedula,
+                    RolName = u.Rol.RolName,
+                    IsActive = u.IsActive
+                })
                 .ToListAsync();
 
-            return new ListOperationResult<UsuarioModel>(true, "", UserList);
+            return new ListOperationResult<UsuarioResponseDTO>(true, "", UserList);
 
         }
         catch (Exception e)
         {
-            return new ListOperationResult<UsuarioModel>(false, $" Error: {e.Message}", null);
+            return new ListOperationResult<UsuarioResponseDTO>(false, $" Error: {e.Message}", null);
         }
         
     }

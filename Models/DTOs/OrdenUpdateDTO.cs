@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic; // Asegúrate de tener este using
 
 namespace BioLabApi.Models.DTOs
 {
@@ -15,13 +16,12 @@ namespace BioLabApi.Models.DTOs
         [Range(0.01, double.MaxValue, ErrorMessage = "El total en divisa debe ser un valor positivo.")]
         public decimal TotalDivisa { get; set; }
 
-       
-        // LISTAS ANIDADAS USANDO DTOs
+        // LISTAS ANIDADAS USANDO DTOs DE ACTUALIZACIÓN (ESTA ES LA CORRECCIÓN)
         [Required]
         [MinLength(1, ErrorMessage = "La orden debe contener al menos un examen (detalle).")]
-        public List<DetalleCreateDTO> Detalles { get; set; } = new();
+        public List<DetalleUpdateDTO> Detalles { get; set; } = new();
 
         // Los pagos pueden ir vacíos si la orden queda "Pendiente" sin abonos iniciales
-        public List<PagoCreateDTO> Pagos { get; set; } = new();
+        public List<PagoUpdateDTO> Pagos { get; set; } = new();
     }
 }

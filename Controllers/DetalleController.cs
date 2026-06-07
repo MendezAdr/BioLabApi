@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using BioLabApi.Models;
 using BioLabApi.Services.Interfaces;
+using BioLabApi.Models.DTOs;
 
 
 namespace BioLabAPI.Controllers
@@ -27,7 +28,7 @@ namespace BioLabAPI.Controllers
             return Ok(detalle);
         }
         [HttpPost]
-        public async Task<IActionResult> CreateDetalle([FromBody] DetalleModel detalle)
+        public async Task<IActionResult> CreateDetalle([FromBody] DetalleCreateDTO detalle)
         {
             var result = await _detalleService.CreateDetalleAsync(detalle);
             if (!result.Success)
@@ -39,7 +40,7 @@ namespace BioLabAPI.Controllers
 
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateDetalle(int id, [FromBody]DetalleModel detalle, [FromQuery] int AdminId)
+        public async Task<IActionResult> UpdateDetalle(int id, [FromBody] DetalleUpdateDTO detalle, [FromQuery] int AdminId)
         {
             var result = await _detalleService.UpdateDetalleAsync(detalle, AdminId, id);
             if (!result.Success)

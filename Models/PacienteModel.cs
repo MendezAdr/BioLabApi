@@ -20,10 +20,24 @@ public class PacienteModel : Auditable
     [Required]
     [MaxLength(10)]
     public string Cedula { get; set; } = string.Empty;
+
+    [Required]
+    public DateTime FechaNacimiento { get; set; }
+    [Required]
+    public string Sexo { get; set; } = "N/A";
+
     [MaxLength(15)] 
-    public string Telefono {get; set;} = string.Empty;
+    public string Telefono {get; set;} = "N/A";
     [ MaxLength(100)]
-    public string Direccion { get; set; } = string.Empty;
+    public string Direccion { get; set; } = "N/A";
     public bool IsActive { get; set; } = true;
+
+    //estos campos son para cuando el paciente es un niño o una niña
+
+    [MaxLength(50)]
+    public string NombreAcompañante { get; set; } = "N/A";
+
+    [MaxLength(10)]
+    public string CedulaAcompañante { get; set; } = "N/A";
 
 }

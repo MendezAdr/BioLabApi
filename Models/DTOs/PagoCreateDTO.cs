@@ -7,7 +7,8 @@ namespace BioLabApi.Models.DTOs
     // Heredamos de IValidatableObject para validaciones complejas cruzadas
     public class PagoCreateDTO : IValidatableObject
     {
-        // ELIMINAMOS OrdenId
+        [Required]
+        public int OrdenId { get; set; }
 
         [Required]
         [Range(0.01, 9999999.99, ErrorMessage = "Inserte un monto válido mayor a cero en el pago.")]

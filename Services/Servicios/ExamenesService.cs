@@ -3,6 +3,7 @@ using BioLabApi.Services.Interfaces;
 using BioLabApi.Data;
 using Microsoft.EntityFrameworkCore;
 using BioLabApi.Helpers;
+using BioLabApi.Models.DTOs;
 
 
 namespace BioLabApi.Services.Servicios;
@@ -18,15 +19,28 @@ public class ExamenesService : IExamenesService
     }
 
 
-    public async Task<ListOperationResult<ExamenModel>> GetExamenesAsync()
+    public async Task<ListOperationResult<ExamenResponseDTO>> GetExamenesAsync()
     {
         try
         {
-            return new ListOperationResult<ExamenModel>(true, "", Data: await _appDbContext.Examenes.ToListAsync());
+            var examenes = await _appDbContext.Examenes
+                .Select( e => new ExamenResponseDTO
+                {
+                    Id = e.Id,
+                    NombreExamen = e.NombreExamen,
+                    CostoEnDivisa = e.CostoEnDivisa,
+                    Descripcion = e.Descripcion,
+                    FechaCreacion = e.FechaCreacion,
+                    CreadoPorId = e.CreadoPorId,
+                    ModificadoPorId = e.ModificadoPorId,
+                    FechaModificacion = e.FechaModificacion
+                }).ToListAsync();
+            
+            return new ListOperationResult<ExamenResponseDTO>(true, "", Data: examenes);
         }
         catch (Exception ex) 
         {
-            return new ListOperationResult<ExamenModel>(false, $"Error: \n{ex.Message}", Data: null);
+            return new ListOperationResult<ExamenResponseDTO>(false, $"Error: \n{ex.Message}", Data: null);
         }
     }
 
@@ -38,7 +52,17 @@ public class ExamenesService : IExamenesService
             {
                 return new ObjectOperationResult(false, "Examen no encontrado.", null);
             }
-            return new ObjectOperationResult(true, "", examen);
+            return new ObjectOperationResult(true, "", new ExamenResponseDTO
+            {
+                Id = examen.Id,
+                NombreExamen = examen.NombreExamen,
+                CostoEnDivisa = examen.CostoEnDivisa,
+                Descripcion = examen.Descripcion,
+                FechaCreacion = examen.FechaCreacion,
+                CreadoPorId = examen.CreadoPorId,
+                ModificadoPorId = examen.ModificadoPorId,
+                FechaModificacion = examen.FechaModificacion
+            });
         }
         catch (Exception ex)
         {
@@ -46,7 +70,7 @@ public class ExamenesService : IExamenesService
         }
     }
 
-    public async Task<ObjectOperationResult> CreateExamenAsync(ExamenModel examen, int AdminId)
+    public async Task<OperationResult> CreateExamenAsync(ExamenCreateDTO examen, int AdminId)
     {
         try
         {
@@ -54,21 +78,22 @@ public class ExamenesService : IExamenesService
             var validationResult = ValidatePermisos(adminValidate);
             if (!validationResult.Success)
             {
-                return new ObjectOperationResult(false, validationResult.Message, null);
+                return new OperationResult(false, validationResult.Message);
             }
-            var examenValidationResult = ValidateExamen(examen);
-            if (!examenValidationResult.Success)
+            
+
+            _appDbContext.Examenes.Add(new ExamenModel
             {
-                return new ObjectOperationResult(false, examenValidationResult.Message, null);
-            }
-
-            examen.FechaCreacion = DateTime.Now;
-            examen.CreadoPorId = AdminId;
-            examen.ModificadoPorId = AdminId;
-
-            _appDbContext.Examenes.Add(examen);
+                NombreExamen = examen.NombreExamen,
+                CostoEnDivisa = examen.CostoEnDivisa,
+                Descripcion = examen.Descripcion,
+                FechaCreacion = DateTime.Now,
+                CreadoPorId = AdminId,
+                ModificadoPorId = AdminId,
+                FechaModificacion = DateTime.Now
+            });
             await _appDbContext.SaveChangesAsync();
-            return new ObjectOperationResult(true, "Examen creado exitosamente.", examen);
+            return new OperationResult(true, "Examen creado exitosamente.");
         }
         catch (Exception ex)
         {
@@ -76,16 +101,13 @@ public class ExamenesService : IExamenesService
         }
     }
 
-    public async Task<OperationResult> UpdateExamenAsync(ExamenModel examen, int AdminId, int ExamenId)
+    public async Task<OperationResult> UpdateExamenAsync(ExamenUpdateDTO examen, int AdminId, int ExamenId)
     {   
         var existingExamen = await _appDbContext.Examenes.FirstOrDefaultAsync(e => e.Id == ExamenId);
         if (existingExamen == null)
         {
             return new OperationResult(false, "El examen al que intenta acceder no existe");
         }
-
-        var validExamen = ValidateExamen(examen);
-        if(!validExamen.Success) return validExamen;
 
         var Admin = await _appDbContext.Usuarios
             .AsNoTracking()
@@ -98,7 +120,6 @@ public class ExamenesService : IExamenesService
         {
             existingExamen.NombreExamen = examen.NombreExamen;
             existingExamen.CostoEnDivisa = examen.CostoEnDivisa;
-            existingExamen.CostoenBolivares = examen.CostoenBolivares;
             existingExamen.Descripcion = examen.Descripcion;
             existingExamen.ModificadoPorId = AdminId;
             existingExamen.FechaModificacion = DateTime.Now;
@@ -140,27 +161,6 @@ public class ExamenesService : IExamenesService
 
 
     //validaciones para crear examen
-    public OperationResult ValidateExamen(ExamenModel examen)
-    {
-        if (examen.NombreExamen == null || examen.NombreExamen.Trim() == "")
-        {
-            return new OperationResult(false, "El nombre del examen es obligatorio.");
-        }
-        if (examen.CostoEnDivisa <= 0)
-        {
-            return new OperationResult(false, "El costo en divisa debe ser un número positivo.");
-        }
-        if (examen.CostoenBolivares <= 0)
-        {
-            return new OperationResult(false, "El costo en bolívares debe ser un número positivo.");
-        }
-        if (examen.Descripcion == null || examen.Descripcion.Trim() == "")
-        {
-            examen.Descripcion = "N/A";
-        }
-        return new OperationResult(true, "");
-
-    }
 
 
     //validar datos para actualizar Examen

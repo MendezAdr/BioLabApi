@@ -8,10 +8,10 @@ public interface IOrdenesService
 {
     // Búsquedas y filtrados
     Task<ObjectOperationResult> GetOrdenByIdAsync(int id, int AdminId);
-    Task<ListOperationResult<OrdenesModel>> GetAllOrdenesAsync(int AdminId);
-    Task<ListOperationResult<OrdenesModel>> GetAllOrdenesByPacienteAsync(int idPaciente, int AdminId);
-    Task<ListOperationResult<OrdenesModel>> GetAllOrdenesEntreFechasAsync(DateTime inicio, DateTime fin, int AdminId);
-    Task<ListOperationResult<OrdenesModel>> GetAllOrdenesByEstadoAsync(OrdenesModel.EstadoPago estado, int AdminId);
+    Task<ListOperationResult<OrdenResponseDTO>> GetAllOrdenesAsync(int AdminId);
+    Task<ListOperationResult<OrdenResponseDTO>> GetAllOrdenesByPacienteAsync(int idPaciente, int AdminId);
+    Task<ListOperationResult<OrdenResponseDTO>> GetAllOrdenesEntreFechasAsync(DateTime inicio, DateTime fin, int AdminId);
+    Task<ListOperationResult<OrdenResponseDTO>> GetAllOrdenesByEstadoAsync(OrdenesModel.EstadoPago estado, int AdminId);
 
     // Operaciones de escritura
     Task<OperationResult> CreateOrdenAsync(OrdenCreateDTO orden, int usuarioId);
