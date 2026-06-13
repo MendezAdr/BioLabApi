@@ -23,6 +23,7 @@ public class PacienteModel : Auditable
 
     [Required]
     public DateTime FechaNacimiento { get; set; }
+
     [Required]
     public string Sexo { get; set; } = "N/A";
 

@@ -15,7 +15,8 @@ public interface IPagosService
     
     
     //metodos restantes
-    Task<OperationResult> CreatePagoAsync(PagoCreateDTO pago);
+
+    Task<OperationResult> CreateAddPagoAsync(PagoStandaloneCreateDTO pago);
     Task<OperationResult> UpdatePagoAsync(PagoUpdateDTO pago, int adminId);
     Task<OperationResult> AnulatePagosAsync(int idPago, int adminId);
 

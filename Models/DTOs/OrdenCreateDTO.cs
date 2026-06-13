@@ -27,6 +27,6 @@ namespace BioLabApi.Models.DTOs
         public List<DetalleCreateDTO> Detalles { get; set; } = new();
 
         // Los pagos pueden ir vacíos si la orden queda "Pendiente" sin abonos iniciales
-        public List<PagoCreateDTO> Pagos { get; set; } = new();
+        public List<PagoOrdenCreateDTO> Pagos { get; set; } = new();
     }
 }

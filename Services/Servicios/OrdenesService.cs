@@ -56,7 +56,7 @@ public class OrdenesService : IOrdenesService
                     Id = p.Id,
                     Metodo = p.Metodo,
                     Monto = p.Monto,
-                    referencia = p.Referencia
+                    Referencia = p.Referencia
                 }))
 
             });
@@ -101,7 +101,7 @@ public class OrdenesService : IOrdenesService
                         Id = p.Id,
                         Metodo = p.Metodo,
                         Monto = p.Monto,
-                        referencia = p.Referencia
+                        Referencia = p.Referencia
                     }))
                 })
                 .ToListAsync();
@@ -147,7 +147,7 @@ public class OrdenesService : IOrdenesService
                         Id = p.Id,
                         Metodo = p.Metodo,
                         Monto = p.Monto,
-                        referencia = p.Referencia
+                        Referencia = p.Referencia
                     }))
                 })
                 .AsNoTracking()
@@ -192,7 +192,7 @@ public class OrdenesService : IOrdenesService
                     Id = p.Id,
                     Metodo = p.Metodo,
                     Monto = p.Monto,
-                    referencia = p.Referencia
+                    Referencia = p.Referencia
                 }))
             })
             .AsNoTracking()
@@ -232,7 +232,7 @@ public class OrdenesService : IOrdenesService
                     Id = p.Id,
                     Metodo = p.Metodo,
                     Monto = p.Monto,
-                    referencia = p.Referencia
+                    Referencia = p.Referencia
                 }))
             })
             .AsNoTracking()
@@ -269,6 +269,7 @@ public class OrdenesService : IOrdenesService
                 {
                     ExamenId = detalleDto.ExamenId,
                     PrecioMomentoDivisa = detalleDto.PrecioMomentoDivisa
+
                 });
             }
 
@@ -283,6 +284,7 @@ public class OrdenesService : IOrdenesService
                     Metodo = pagoDto.Metodo,
                     Monto = pagoDto.Monto,
                     Referencia = pagoDto.Referencia ?? string.Empty // Evitar nulos
+
                 });
 
                 // Lógica Bimodal: Normalizar este pago específico a Divisa para el cálculo

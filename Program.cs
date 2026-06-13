@@ -23,6 +23,7 @@ builder.Services.AddScoped<IPacientesService, PacienteService>();
 builder.Services.AddScoped<IExamenesService, ExamenesService>(); 
 builder.Services.AddScoped<IDetalleService, DetalleService>();
 builder.Services.AddScoped<IPagosService, PagosService>();
+builder.Services.AddScoped<IOrdenesService, OrdenesService>();
 
 // ==========================================
 // 3. CONFIGURACIÓN DE CORS (Para Electron)

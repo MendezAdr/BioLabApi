@@ -21,6 +21,11 @@ public class AppDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
+
+        //despues descomento esto para probar la ubicacion de la base de datos,
+        //por ahora necesito que sea local para borrarla y probarla.
+
+
         //var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
         //var folder = Path.Combine(appData, "Laboratorio.Db");
         //if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
@@ -32,6 +37,9 @@ public class AppDbContext : DbContext
         //.ConfigureWarnings(warnings => warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
 
         options.UseSqlite("Data Source=Laboratorio.db")
+            .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information)
+           // 2. Muestra los valores reales (ej: pacienteId = 1) en vez de ocultarlos por seguridad
+           .EnableSensitiveDataLogging()
             .ConfigureWarnings(warnings => warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
     }
 
@@ -41,8 +49,28 @@ public class AppDbContext : DbContext
         // 2. Seeding de Usuario Administrador Inicial
 
         modelBuilder.Entity<RolModel>().HasData(
-            new RolModel { Id = 1, RolName = "Admin" , Permisos = (RolModel.PermisosSistema)32 | (RolModel.PermisosSistema)4 | (RolModel.PermisosSistema)64 },
-            new RolModel { Id = 2, RolName = "Usuario" , Permisos = (RolModel.PermisosSistema)2 }
+            new RolModel
+            {
+                Id = 1,
+                RolName = "Admin",
+                Permisos =
+                   RolModel.PermisosSistema.CrearVenta |
+                   RolModel.PermisosSistema.HacerCierre |
+                   RolModel.PermisosSistema.GestionarUsuarios |
+                   RolModel.PermisosSistema.VerReportesAntiguos |
+                   RolModel.PermisosSistema.ModificarExamenes |
+                   RolModel.PermisosSistema.ModificarPacientes |
+                   RolModel.PermisosSistema.ModificarPagos |
+                   RolModel.PermisosSistema.ModificarOrdenesYDetalles
+            },
+
+
+            new RolModel
+            {
+                Id = 2,
+                RolName = "Usuario",
+                Permisos = RolModel.PermisosSistema.HacerCierre
+            }
         );
         modelBuilder.Entity<UsuarioModel>().HasData(
             new UsuarioModel

@@ -67,10 +67,12 @@ namespace BioLabAPI.Controllers
             return Ok(result);
         }
 
+       
+
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] PagoCreateDTO pago)
+        public async Task<IActionResult> CreateAddPago([FromBody] PagoStandaloneCreateDTO pago)
         {
-            var result = await _pagosService.CreatePagoAsync(pago);
+            var result = await _pagosService.CreateAddPagoAsync(pago);
             if (!result.Success) return NotFound(result);
             return Ok(result);
         }

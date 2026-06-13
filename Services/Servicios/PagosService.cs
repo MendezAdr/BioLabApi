@@ -175,7 +175,8 @@ public class PagosService : IPagosService
 
 
     //metodos restantes
-    public async Task<OperationResult> CreatePagoAsync(PagoCreateDTO pago)
+
+    public async Task<OperationResult> CreateAddPagoAsync(PagoStandaloneCreateDTO pago)
     {
         using var transaction = await _dbContext.Database.BeginTransactionAsync();
 
@@ -209,6 +210,7 @@ public class PagosService : IPagosService
             return new OperationResult(false, $"Error: {e.Message} ");
         }
     }
+
 
     public async Task<OperationResult> UpdatePagoAsync(PagoUpdateDTO pago, int adminId)
     {

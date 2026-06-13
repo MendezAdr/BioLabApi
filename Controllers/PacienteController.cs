@@ -29,10 +29,10 @@ namespace BioLabAPI.Controllers
 
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetAll(int Id)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetById(int id)
         {
-            var result = await _pacienteService.GetPacienteByIdAsync(Id);
+            var result = await _pacienteService.GetPacienteByIdAsync(id);
             if (!result.Success) return NotFound(result);
             return Ok(result);
         }
@@ -73,7 +73,7 @@ namespace BioLabAPI.Controllers
         }
 
         //actualizar un paciente
-        [HttpPatch("{id:int}/actualizar")]
+        [HttpPatch("{id}/actualizar")]
         public async Task<IActionResult> Update([FromBody] PacienteUpdateDTO paciente, [FromRoute] int id)
         {
             var result = await _pacienteService.UpdateAsync(paciente, id);
@@ -81,7 +81,7 @@ namespace BioLabAPI.Controllers
             return Ok(result);
         }
 
-        [HttpPatch("{id:int}/Desactivar")]
+        [HttpPatch("{id}/Desactivar")]
         public async Task<IActionResult> Deactivate(int id, [FromQuery] int adminID )
         {
             var result = await _pacienteService.DeactivateAsync(id, adminID);
@@ -89,7 +89,7 @@ namespace BioLabAPI.Controllers
             return Ok(result);
         }
 
-        [HttpPatch("{id:int}/activar")]
+        [HttpPatch("{id}/activar")]
         public async Task<IActionResult> Activate(int id, [FromQuery] int adminID, [FromQuery] bool State)
         {
             var result = await _pacienteService.ActivateAsync(id, adminID, State);

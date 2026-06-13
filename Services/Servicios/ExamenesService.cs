@@ -74,7 +74,11 @@ public class ExamenesService : IExamenesService
     {
         try
         {
-            var adminValidate = await _appDbContext.Usuarios.FindAsync(AdminId);
+            var adminValidate = await _appDbContext.Usuarios
+                .Include(u => u.Rol)
+                .FirstOrDefaultAsync(u => u.Id == AdminId);
+
+
             var validationResult = ValidatePermisos(adminValidate);
             if (!validationResult.Success)
             {
@@ -111,6 +115,7 @@ public class ExamenesService : IExamenesService
 
         var Admin = await _appDbContext.Usuarios
             .AsNoTracking()
+            .Include(u => u.Rol)
             .FirstOrDefaultAsync(u => u.Id == AdminId);
         
         var validateAdmin = ValidatePermisos(Admin);
@@ -142,8 +147,9 @@ public class ExamenesService : IExamenesService
         }
         var Admin = await _appDbContext.Usuarios
             .AsNoTracking()
+            .Include(u => u.Rol)
             .FirstOrDefaultAsync(u => u.Id == AdminId);
-        
+
         var validateAdmin = ValidatePermisos(Admin);
         if (!validateAdmin.Success) return validateAdmin;
         try

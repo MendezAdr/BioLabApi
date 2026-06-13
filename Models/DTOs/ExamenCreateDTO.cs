@@ -14,5 +14,7 @@ namespace BioLabApi.Models.DTOs
 
         [MaxLength(150)] //es opcional, pero no puede ser muy largo
         public string Descripcion { get; set; } = string.Empty;
+
+
     }
 }
