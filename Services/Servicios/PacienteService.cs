@@ -310,7 +310,7 @@ public class PacienteService : IPacientesService
             return new OperationResult(false, "Usuario administrador no encontrado.");
         }
 
-        if (!adminValidate.Rol.Permisos.HasFlag(RolModel.PermisosSistema.ModificarPacientes))
+        if (!adminValidate.Rol.Permisos.HasFlag(RolModel.PermisosSistema.GestionarPacientes))
         {
             return new OperationResult(false, "El usuario no tiene permisos para gestionar pacientes.");
         }

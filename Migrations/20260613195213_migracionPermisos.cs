@@ -3,10 +3,12 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
+#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
+
 namespace BioLabApi.Migrations
 {
     /// <inheritdoc />
-    public partial class MigracionInicialLimpia : Migration
+    public partial class migracionPermisos : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -17,10 +19,9 @@ namespace BioLabApi.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    NombreExamen = table.Column<string>(type: "TEXT", nullable: false),
+                    NombreExamen = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
                     CostoEnDivisa = table.Column<decimal>(type: "TEXT", nullable: false),
-                    CostoenBolivares = table.Column<decimal>(type: "TEXT", nullable: false),
-                    Descripcion = table.Column<string>(type: "TEXT", nullable: false),
+                    Descripcion = table.Column<string>(type: "TEXT", maxLength: 150, nullable: false),
                     CreadoPorId = table.Column<int>(type: "INTEGER", nullable: false),
                     FechaCreacion = table.Column<DateTime>(type: "TEXT", nullable: false),
                     ModificadoPorId = table.Column<int>(type: "INTEGER", nullable: true),
@@ -37,12 +38,16 @@ namespace BioLabApi.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Nombre = table.Column<string>(type: "TEXT", nullable: false),
-                    Apellido = table.Column<string>(type: "TEXT", nullable: false),
-                    Cedula = table.Column<string>(type: "TEXT", nullable: false),
-                    Telefono = table.Column<string>(type: "TEXT", nullable: false),
-                    Direccion = table.Column<string>(type: "TEXT", nullable: false),
+                    Nombre = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
+                    Apellido = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
+                    Cedula = table.Column<string>(type: "TEXT", maxLength: 10, nullable: false),
+                    FechaNacimiento = table.Column<DateTime>(type: "TEXT", nullable: false),
+                    Sexo = table.Column<string>(type: "TEXT", nullable: false),
+                    Telefono = table.Column<string>(type: "TEXT", maxLength: 15, nullable: false),
+                    Direccion = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
                     IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
+                    NombreAcompañante = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    CedulaAcompañante = table.Column<string>(type: "TEXT", maxLength: 10, nullable: false),
                     CreadoPorId = table.Column<int>(type: "INTEGER", nullable: false),
                     FechaCreacion = table.Column<DateTime>(type: "TEXT", nullable: false),
                     ModificadoPorId = table.Column<int>(type: "INTEGER", nullable: true),
@@ -73,7 +78,7 @@ namespace BioLabApi.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    NumeroFactura = table.Column<string>(type: "TEXT", nullable: false),
+                    NumeroFactura = table.Column<string>(type: "TEXT", maxLength: 80, nullable: false),
                     Fecha = table.Column<DateTime>(type: "TEXT", nullable: false),
                     PacienteId = table.Column<int>(type: "INTEGER", nullable: false),
                     TotalDivisa = table.Column<decimal>(type: "TEXT", nullable: false),
@@ -101,10 +106,10 @@ namespace BioLabApi.Migrations
                 {
                     Id = table.Column<int>(type: "INTEGER", nullable: false)
                         .Annotation("Sqlite:Autoincrement", true),
-                    Username = table.Column<string>(type: "TEXT", nullable: false),
-                    Nombre = table.Column<string>(type: "TEXT", nullable: false),
-                    Apellido = table.Column<string>(type: "TEXT", nullable: false),
-                    Cedula = table.Column<string>(type: "TEXT", nullable: false),
+                    Username = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
+                    Nombre = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    Apellido = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    Cedula = table.Column<string>(type: "TEXT", maxLength: 10, nullable: false),
                     Contrasena = table.Column<string>(type: "TEXT", nullable: false),
                     IsActive = table.Column<bool>(type: "INTEGER", nullable: false),
                     RolId = table.Column<int>(type: "INTEGER", nullable: false),
@@ -160,7 +165,7 @@ namespace BioLabApi.Migrations
                     OrdenId = table.Column<int>(type: "INTEGER", nullable: false),
                     Metodo = table.Column<int>(type: "INTEGER", nullable: false),
                     Monto = table.Column<decimal>(type: "TEXT", nullable: false),
-                    Referencia = table.Column<string>(type: "TEXT", nullable: false)
+                    Referencia = table.Column<string>(type: "TEXT", maxLength: 80, nullable: false)
                 },
                 constraints: table =>
                 {
@@ -172,6 +177,20 @@ namespace BioLabApi.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
+
+            migrationBuilder.InsertData(
+                table: "Roles",
+                columns: new[] { "Id", "Permisos", "RolName" },
+                values: new object[,]
+                {
+                    { 1, 255, "Admin" },
+                    { 2, 2, "Usuario" }
+                });
+
+            migrationBuilder.InsertData(
+                table: "Usuarios",
+                columns: new[] { "Id", "Apellido", "Cedula", "Contrasena", "CreadoPorId", "FechaCreacion", "FechaModificacion", "IsActive", "ModificadoPorId", "Nombre", "RolId", "Username" },
+                values: new object[] { 1, "User", "00", "$2a$11$j2PAZ0tY89cguph5K86f0O9HoE49UjAOGQJlajdUeGn5R4ckUUyBW", 0, new DateTime(2026, 6, 13, 15, 52, 12, 56, DateTimeKind.Local).AddTicks(4630), null, true, null, "Admin", 1, "admin" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Detalles_ExamenId",

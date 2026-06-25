@@ -177,7 +177,7 @@ public class ExamenesService : IExamenesService
             return new OperationResult(false, "Usuario administrador no encontrado.");
         }
         
-        if (!adminValidate.Rol.Permisos.HasFlag(RolModel.PermisosSistema.ModificarExamenes))
+        if (!adminValidate.Rol.Permisos.HasFlag(RolModel.PermisosSistema.GestionarExamenes))
         {
             return new OperationResult(false, "El usuario no tiene permisos para gestionar exámenes.");
         }

@@ -311,9 +311,9 @@ public class PagosService : IPagosService
     {
         if (adminValidate == null) return new OperationResult(false, "Usuario administrador no encontrado.");
 
-        if (!adminValidate.Rol.Permisos.HasFlag(RolModel.PermisosSistema.CrearVenta))
+        if (!adminValidate.Rol.Permisos.HasFlag(RolModel.PermisosSistema.GestionarPagos))
         {
-            return new OperationResult(false, "El usuario no tiene permisos para gestionar ventas.");
+            return new OperationResult(false, "El usuario no tiene permisos para gestionar pagos.");
         }
 
         return new OperationResult(true, " ");

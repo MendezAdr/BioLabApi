@@ -13,7 +13,7 @@
 
   <ItemGroup>
     <Folder Include="Data\" />
-    <Folder Include="Services\Interfaces\" />
+    <Folder Include="Migrations\" />
     <Folder Include="Services\Servicios\" />
 
     <PackageReference Include="BCrypt" Version="1.0.0" />

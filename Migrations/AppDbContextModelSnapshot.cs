@@ -138,6 +138,11 @@ namespace BioLabApi.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("CedulaAcompañante")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("TEXT");
+
                     b.Property<int>("CreadoPorId")
                         .HasColumnType("INTEGER");
 
@@ -152,6 +157,9 @@ namespace BioLabApi.Migrations
                     b.Property<DateTime?>("FechaModificacion")
                         .HasColumnType("TEXT");
 
+                    b.Property<DateTime>("FechaNacimiento")
+                        .HasColumnType("TEXT");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("INTEGER");
 
@@ -161,6 +169,15 @@ namespace BioLabApi.Migrations
                     b.Property<string>("Nombre")
                         .IsRequired()
                         .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NombreAcompañante")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Sexo")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Telefono")
@@ -194,7 +211,7 @@ namespace BioLabApi.Migrations
                         new
                         {
                             Id = 1,
-                            Permisos = 100,
+                            Permisos = 255,
                             RolName = "Admin"
                         },
                         new
@@ -265,9 +282,9 @@ namespace BioLabApi.Migrations
                             Id = 1,
                             Apellido = "User",
                             Cedula = "00",
-                            Contrasena = "$2a$11$fjPIBjjjV8VbtMHH5kRQNuE2WtVVt7cnhujWwTOO6cG.KWUYZjC8O",
+                            Contrasena = "$2a$11$j2PAZ0tY89cguph5K86f0O9HoE49UjAOGQJlajdUeGn5R4ckUUyBW",
                             CreadoPorId = 0,
-                            FechaCreacion = new DateTime(2026, 6, 6, 18, 47, 44, 360, DateTimeKind.Local).AddTicks(5341),
+                            FechaCreacion = new DateTime(2026, 6, 13, 15, 52, 12, 56, DateTimeKind.Local).AddTicks(4630),
                             IsActive = true,
                             Nombre = "Admin",
                             RolId = 1,

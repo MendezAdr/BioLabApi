@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BioLabApi.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260519220516_MigracionInicialLimpia")]
-    partial class MigracionInicialLimpia
+    [Migration("20260613195213_migracionPermisos")]
+    partial class migracionPermisos
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -53,14 +53,12 @@ namespace BioLabApi.Migrations
                     b.Property<decimal>("CostoEnDivisa")
                         .HasColumnType("TEXT");
 
-                    b.Property<decimal>("CostoenBolivares")
-                        .HasColumnType("TEXT");
-
                     b.Property<int>("CreadoPorId")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Descripcion")
                         .IsRequired()
+                        .HasMaxLength(150)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("FechaCreacion")
@@ -74,6 +72,7 @@ namespace BioLabApi.Migrations
 
                     b.Property<string>("NombreExamen")
                         .IsRequired()
+                        .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -107,6 +106,7 @@ namespace BioLabApi.Migrations
 
                     b.Property<string>("NumeroFactura")
                         .IsRequired()
+                        .HasMaxLength(80)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("PacienteId")
@@ -133,10 +133,17 @@ namespace BioLabApi.Migrations
 
                     b.Property<string>("Apellido")
                         .IsRequired()
+                        .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Cedula")
                         .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("CedulaAcompañante")
+                        .IsRequired()
+                        .HasMaxLength(10)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("CreadoPorId")
@@ -144,12 +151,16 @@ namespace BioLabApi.Migrations
 
                     b.Property<string>("Direccion")
                         .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("FechaCreacion")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime?>("FechaModificacion")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("FechaNacimiento")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsActive")
@@ -160,10 +171,21 @@ namespace BioLabApi.Migrations
 
                     b.Property<string>("Nombre")
                         .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NombreAcompañante")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Sexo")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Telefono")
                         .IsRequired()
+                        .HasMaxLength(15)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -187,6 +209,20 @@ namespace BioLabApi.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Roles");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Permisos = 255,
+                            RolName = "Admin"
+                        },
+                        new
+                        {
+                            Id = 2,
+                            Permisos = 2,
+                            RolName = "Usuario"
+                        });
                 });
 
             modelBuilder.Entity("BioLabApi.Models.UsuarioModel", b =>
@@ -197,10 +233,12 @@ namespace BioLabApi.Migrations
 
                     b.Property<string>("Apellido")
                         .IsRequired()
+                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Cedula")
                         .IsRequired()
+                        .HasMaxLength(10)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Contrasena")
@@ -224,6 +262,7 @@ namespace BioLabApi.Migrations
 
                     b.Property<string>("Nombre")
                         .IsRequired()
+                        .HasMaxLength(50)
                         .HasColumnType("TEXT");
 
                     b.Property<int>("RolId")
@@ -231,6 +270,7 @@ namespace BioLabApi.Migrations
 
                     b.Property<string>("Username")
                         .IsRequired()
+                        .HasMaxLength(20)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");
@@ -238,6 +278,21 @@ namespace BioLabApi.Migrations
                     b.HasIndex("RolId");
 
                     b.ToTable("Usuarios");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            Apellido = "User",
+                            Cedula = "00",
+                            Contrasena = "$2a$11$j2PAZ0tY89cguph5K86f0O9HoE49UjAOGQJlajdUeGn5R4ckUUyBW",
+                            CreadoPorId = 0,
+                            FechaCreacion = new DateTime(2026, 6, 13, 15, 52, 12, 56, DateTimeKind.Local).AddTicks(4630),
+                            IsActive = true,
+                            Nombre = "Admin",
+                            RolId = 1,
+                            Username = "admin"
+                        });
                 });
 
             modelBuilder.Entity("PagosModel", b =>
@@ -257,6 +312,7 @@ namespace BioLabApi.Migrations
 
                     b.Property<string>("Referencia")
                         .IsRequired()
+                        .HasMaxLength(80)
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

@@ -515,8 +515,8 @@ public class OrdenesService : IOrdenesService
             return new OperationResult(false, "Usuario administrador no encontrado.");
         }
 
-        bool puedeOperarOrdenes = adminValidate.Rol.Permisos.HasFlag(RolModel.PermisosSistema.CrearVenta) ||
-                              adminValidate.Rol.Permisos.HasFlag(RolModel.PermisosSistema.HacerCierre);
+        bool puedeOperarOrdenes = adminValidate.Rol.Permisos.HasFlag(RolModel.PermisosSistema.CrearOrdenesYDetalles) ||
+                              adminValidate.Rol.Permisos.HasFlag(RolModel.PermisosSistema.Totalizar);
 
         if (!puedeOperarOrdenes)
         {

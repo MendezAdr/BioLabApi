@@ -11,15 +11,30 @@ public class RolModel
     [Flags] // importante, colocar mas permisos, ser mas especifico.
     public enum PermisosSistema
     {
-        Ninguno = 0,
-        CrearVenta = 1,      
-        HacerCierre = 2,     
-        GestionarUsuarios = 4, 
-        VerReportesAntiguos = 8,
-        ModificarExamenes = 16,
-        ModificarPacientes = 32,
-        ModificarPagos = 64,
-        ModificarOrdenesYDetalles = 128,
+        /* 
+        Todos = 0,
+        CrearOrdenesYDetalles = 1,
+        GestionarUsuarios = 2, 
+        ModificarOrdenesYDetalles = 4,
+        GestionarPagos = 8,
+        GestionarPacientes = 16,
+        GestionarExamenes = 32,
+        Totalizar = 64,     
+        VerReportesAntiguos = 128,
+        GestionarPresupuestos = 256,
+
+         
+         */
+        Todos = 0,
+        CrearOrdenesYDetalles = 1,
+        GestionarUsuarios = 2,
+        ModificarOrdenesYDetalles = 4,
+        GestionarPagos = 8,
+        GestionarPacientes = 16,
+        GestionarExamenes = 32,
+        Totalizar = 64,
+        VerReportesAntiguos = 128,
+        GestionarPresupuestos = 256,
 
     }
 }

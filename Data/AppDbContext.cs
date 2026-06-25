@@ -54,14 +54,16 @@ public class AppDbContext : DbContext
                 Id = 1,
                 RolName = "Admin",
                 Permisos =
-                   RolModel.PermisosSistema.CrearVenta |
-                   RolModel.PermisosSistema.HacerCierre |
+                   RolModel.PermisosSistema.CrearOrdenesYDetalles |
                    RolModel.PermisosSistema.GestionarUsuarios |
-                   RolModel.PermisosSistema.VerReportesAntiguos |
-                   RolModel.PermisosSistema.ModificarExamenes |
-                   RolModel.PermisosSistema.ModificarPacientes |
-                   RolModel.PermisosSistema.ModificarPagos |
-                   RolModel.PermisosSistema.ModificarOrdenesYDetalles
+                   RolModel.PermisosSistema.ModificarOrdenesYDetalles |
+                   RolModel.PermisosSistema.GestionarPagos |
+                   RolModel.PermisosSistema.GestionarExamenes |
+                   RolModel.PermisosSistema.GestionarPacientes |
+                   RolModel.PermisosSistema.Totalizar |
+                   RolModel.PermisosSistema.GestionarPresupuestos |
+                   RolModel.PermisosSistema.VerReportesAntiguos
+
             },
 
 
@@ -69,7 +71,7 @@ public class AppDbContext : DbContext
             {
                 Id = 2,
                 RolName = "Usuario",
-                Permisos = RolModel.PermisosSistema.HacerCierre
+                Permisos = RolModel.PermisosSistema.Totalizar
             }
         );
         modelBuilder.Entity<UsuarioModel>().HasData(
