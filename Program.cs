@@ -1,7 +1,7 @@
 using BioLabApi.Data;
 using BioLabApi.Services.Interfaces;
 using BioLabApi.Services.Servicios;
-
+using BioLabApi.Helpers;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,14 +25,23 @@ builder.Services.AddScoped<IDetalleService, DetalleService>();
 builder.Services.AddScoped<IPagosService, PagosService>();
 builder.Services.AddScoped<IOrdenesService, OrdenesService>();
 
+// Registrar HttpClient para hacer peticiones limpias
+builder.Services.AddHttpClient();
+
+// Registrar la clase helper como Singleton (una sola instancia en toda la app)
+builder.Services.AddSingleton<GetDollarPrice>();
+
+// Registrar el proceso en segundo plano
+builder.Services.AddHostedService<DollarUpdateWorker>();
+
 // ==========================================
-// 3. CONFIGURACIÓN DE CORS (Para Electron)
+// 3. CONFIGURACIÓN DE CORS (Para Tauri)
 // ==========================================
-// Esto es vital. Sin esto, el frontend en Electron (Node.js) será bloqueado 
+// Esto es vital. Sin esto, el frontend en Tauri (Node.js) será bloqueado 
 // por el navegador interno cuando intente hacer peticiones a la API.
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("AllowElectronApp", policy =>
+    options.AddPolicy("AllowTauriApp", policy =>
     {
         policy.AllowAnyOrigin()   // Permite peticiones desde cualquier origen (localhost, archivo local, etc)
               .AllowAnyMethod()   // Permite GET, POST, PUT, DELETE, etc.
@@ -57,7 +66,7 @@ var app = builder.Build();
 // ==========================================
 
 // Aplicar la política de CORS que creamos arriba (DEBE ir antes de MapControllers)
-app.UseCors("AllowElectronApp");
+app.UseCors("AllowTauriApp");
 
 // Habilitar Swagger (La interfaz web para probar tus endpoints)
 if (app.Environment.IsDevelopment())

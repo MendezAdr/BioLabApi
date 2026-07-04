@@ -11,11 +11,14 @@ namespace BioLabApi.Controllers;
 [Route("api/[controller]")] // La ruta será: api/usuarios
 public class UsuariosController : ControllerBase
 {
-    private readonly IUsuarioService _usuarioService; // Inyección de dependencia del servicio de usuarios
+    private readonly IUsuarioService _usuarioService; 
+    private readonly GetDollarPrice _dollarPrice; // 1. Declarar la utilidad del dólar
 
-    public UsuariosController(IUsuarioService usuarioService)
+    // 2. Inyectar GetDollarPrice en el constructor
+    public UsuariosController(IUsuarioService usuarioService, GetDollarPrice dollarPrice)
     {
         _usuarioService = usuarioService;
+        _dollarPrice = dollarPrice;
     }
 
     //=================================================
@@ -29,8 +32,18 @@ public class UsuariosController : ControllerBase
 
         if (!result.Success)
             return Unauthorized(result); // Devuelve error 401
-
-        return Ok(result); // Devuelve el objeto Usuario con su Rol (RF-2)
+        
+        var response = new
+        {
+            Exito = true,
+            Mensaje = result.Message,
+            UsuarioInfo = result.objeto, // Aquí va el objeto UserExist que retorna tu servicio
+            
+            // Evaluamos si el Worker logró obtener la tasa
+            TasaDolar = _dollarPrice.IsSuccess ? _dollarPrice.CurrentRate?.Promedio : null,
+            EstadoTasa = _dollarPrice.IsSuccess ? "Tasa del día obtenida" : "Fallo al obtener tasa, el front debe reintentar"
+        };
+        return Ok(response); // Devuelve el objeto Usuario con su Rol (RF-2)
     }
         
     // RF-3: Registro de Usuarios
