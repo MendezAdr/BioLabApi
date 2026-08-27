@@ -4,7 +4,6 @@ using BioLabApi.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using BioLabApi.Models.DTOs;
 
-
 namespace BioLabApi.Controllers;
 
 [ApiController] // Indica que esta clase es una API
@@ -12,9 +11,8 @@ namespace BioLabApi.Controllers;
 public class UsuariosController : ControllerBase
 {
     private readonly IUsuarioService _usuarioService; 
-    private readonly GetDollarPrice _dollarPrice; // 1. Declarar la utilidad del dólar
+    private readonly GetDollarPrice _dollarPrice; 
 
-    // 2. Inyectar GetDollarPrice en el constructor
     public UsuariosController(IUsuarioService usuarioService, GetDollarPrice dollarPrice)
     {
         _usuarioService = usuarioService;
@@ -24,6 +22,7 @@ public class UsuariosController : ControllerBase
     //=================================================
     //              metodos Post
     //=================================================
+    
     // RF-1: Autenticación de Usuarios
     [HttpPost("login")]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
@@ -31,29 +30,28 @@ public class UsuariosController : ControllerBase
         var result = await _usuarioService.LoginAsync(request.Username, request.Password);
 
         if (!result.Success)
-            return Unauthorized(result); // Devuelve error 401
+            return Unauthorized(result); 
         
         var response = new
         {
             Exito = true,
             Mensaje = result.Message,
-            UsuarioInfo = result.objeto, // Aquí va el objeto UserExist que retorna tu servicio
+            UsuarioInfo = result.objeto, 
             
-            // Evaluamos si el Worker logró obtener la tasa
             TasaDolar = _dollarPrice.IsSuccess ? _dollarPrice.CurrentRate?.Promedio : null,
             EstadoTasa = _dollarPrice.IsSuccess ? "Tasa del día obtenida" : "Fallo al obtener tasa, el front debe reintentar"
         };
-        return Ok(response); // Devuelve el objeto Usuario con su Rol (RF-2)
+        return Ok(response); 
     }
         
     // RF-3: Registro de Usuarios
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] UsuarioCreateDTO nuevoUsuario, [FromQuery] int adminId)
+    public async Task<IActionResult> Create([FromBody] UsuarioCreateDTO nuevoUsuario, [FromHeader(Name = "X-Usuario-Id")] int usuarioId)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var result = await _usuarioService.CreateUsuarioAsync(nuevoUsuario, adminId);
+        var result = await _usuarioService.CreateUsuarioAsync(nuevoUsuario, usuarioId);
 
         if (!result.Success)
             return BadRequest(result);
@@ -61,22 +59,22 @@ public class UsuariosController : ControllerBase
         return Ok(result);
     }
 
-
     //=================================================
     //              metodos Get
     //=================================================
+    
     // RF-3: Obtener lista para el Administrador
     [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] int adminId)
+    public async Task<IActionResult> GetAll([FromHeader(Name = "X-Usuario-Id")] int usuarioId)
     {
-        var result = await _usuarioService.GetAllUsuariosAsync(adminId);
+        var result = await _usuarioService.GetAllUsuariosAsync(usuarioId);
         return Ok(result);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetById(int id, [FromQuery] int adminId)
+    public async Task<IActionResult> GetById(int id, [FromHeader(Name = "X-Usuario-Id")] int usuarioId)
     {
-        var result = await _usuarioService.GetUserByIdAsync(id, adminId);
+        var result = await _usuarioService.GetUserByIdAsync(id, usuarioId);
 
         if (!result.Success)
             return NotFound(result);
@@ -84,17 +82,15 @@ public class UsuariosController : ControllerBase
         return Ok(result);
     }
 
-
-
     //=================================================
     //              metodos Patch
     //=================================================
 
     // RF-3: Desactivar cuentas (Baja de usuarios)
     [HttpPatch("{id}/desactivar")]
-    public async Task<IActionResult> Deactivate(int id, [FromQuery] int adminId)
+    public async Task<IActionResult> Deactivate(int id, [FromHeader(Name = "X-Usuario-Id")] int usuarioId)
     {
-        var result = await _usuarioService.DeactivateUsuarioAsync(id, adminId);
+        var result = await _usuarioService.DeactivateUsuarioAsync(id, usuarioId);
 
         if (!result.Success)
             return BadRequest(result);
@@ -103,22 +99,21 @@ public class UsuariosController : ControllerBase
     }
 
     [HttpPatch("{id}/activar")]
-    public async Task<IActionResult> Activate(int id, [FromQuery] int adminId)
+    public async Task<IActionResult> Activate(int id, [FromHeader(Name = "X-Usuario-Id")] int usuarioId)
     {
-        var result = await _usuarioService.ActivateUsuarioAsync(id, adminId);
+        var result = await _usuarioService.ActivateUsuarioAsync(id, usuarioId);
 
         if (!result.Success)
             return BadRequest(result);
 
         return Ok(result);
     }
-
     
     // RF-5: Restablecimiento de Credenciales
     [HttpPatch("{id}/reset-password")]
-    public async Task<IActionResult> ResetPassword(int id, [FromBody] string newPassword, [FromQuery] int adminId)
+    public async Task<IActionResult> ResetPassword(int id, [FromBody] string newPassword, [FromHeader(Name = "X-Usuario-Id")] int usuarioId)
     {
-        var result = await _usuarioService.ChangePasswordAsync(id, newPassword, adminId);
+        var result = await _usuarioService.ChangePasswordAsync(id, newPassword, usuarioId);
 
         if (!result.Success)
             return BadRequest(result);
@@ -131,29 +126,24 @@ public class UsuariosController : ControllerBase
     // =================================================
 
     [HttpPut("{id}")]
-    public async Task<IActionResult> UpdateUser(int id, [FromBody] UsuarioUpdateDTO usuario, [FromQuery] int adminId)
+    public async Task<IActionResult> UpdateUser(int id, [FromBody] UsuarioUpdateDTO usuario, [FromHeader(Name = "X-Usuario-Id")] int usuarioId)
     {   
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        // Validación de seguridad: el ID de la URL debe coincidir con el del objeto
         if (id != usuario.Id)
             return BadRequest(new OperationResult(false, "El ID del usuario no coincide con la petición."));
 
-        var result = await _usuarioService.UpdateUsuarioAsync(usuario, adminId);
+        var result = await _usuarioService.UpdateUsuarioAsync(usuario, usuarioId);
 
         if (!result.Success)
         {
-            // Si el mensaje indica que no existe, enviamos NotFound, de lo contrario BadRequest
             if (result.Message.Contains("no existe")) return NotFound(result);
             return BadRequest(result);
         }
 
         return Ok(result);
     }
-
 }
 
-
-// Clase auxiliar para el login
 public record LoginRequest(string Username, string Password);

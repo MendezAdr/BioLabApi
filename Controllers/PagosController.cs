@@ -7,7 +7,6 @@ namespace BioLabAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-
     public class PagosController : ControllerBase
     {
         private readonly IPagosService _pagosService;
@@ -16,15 +15,6 @@ namespace BioLabAPI.Controllers
         {
             _pagosService = pagosService;
         }
-
-
-        //[HttpGet]
-        //public async Task<IActionResult> Get()
-        //{
-        //    var result = await _pagosService.GetAllPagosAsync();
-        //    if (!result.Success) return NotFound(result);
-        //    return Ok(result);
-        //}
 
         [HttpGet("{id}")]
         public async Task<IActionResult> Get(int id)
@@ -48,7 +38,6 @@ namespace BioLabAPI.Controllers
             var result = await _pagosService.GetPagosByOrdenAsync(ordenId);
             if (!result.Success) return NotFound(result);
             return Ok(result);
-
         }
 
         [HttpGet("referencia/{referenciaId}")]
@@ -59,40 +48,40 @@ namespace BioLabAPI.Controllers
             return Ok(result);
         }
 
+        // CORRECCIÓN: Usar [FromQuery] en lugar de [FromBody] para un GET
         [HttpGet("fechas")]
-        public async Task<IActionResult> GetByFechas([FromBody] DateTime? fechaInicio, DateTime? fechaFin)
+        public async Task<IActionResult> GetByFechas([FromQuery] DateTime? fechaInicio, [FromQuery] DateTime? fechaFin)
         {
             var result = await _pagosService.GetAllPagosEntreFechasAsync(fechaInicio, fechaFin);
             if (!result.Success) return NotFound(result);
             return Ok(result);
         }
 
-       
-
+        // CORRECCIÓN: Añadido el Header de seguridad
         [HttpPost]
-        public async Task<IActionResult> CreateAddPago([FromBody] PagoStandaloneCreateDTO pago)
+        public async Task<IActionResult> CreateAddPago([FromBody] PagoStandaloneCreateDTO pago, [FromHeader(Name = "X-Usuario-Id")] int usuarioId)
         {
-            var result = await _pagosService.CreateAddPagoAsync(pago);
+            var result = await _pagosService.CreateAddPagoAsync(pago, usuarioId); // Asumo que actualizarás la interfaz del servicio para recibir el id
             if (!result.Success) return NotFound(result);
             return Ok(result);
         }
 
-
+        // CORRECCIÓN: Añadido el Header de seguridad
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] PagoUpdateDTO pago)
+        public async Task<IActionResult> Update(int id, [FromBody] PagoUpdateDTO pago, [FromHeader(Name = "X-Usuario-Id")] int usuarioId)
         {
-            var result = await _pagosService.UpdatePagoAsync(pago, id);
+            var result = await _pagosService.UpdatePagoAsync(pago, id, usuarioId); // Asumo actualización de la interfaz
             if (!result.Success) return NotFound(result);
             return Ok(result);
         }
 
+        // CORRECCIÓN: Cambiado [FromBody] a [FromHeader] y renombrado a usuarioId
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id, [FromBody] int AdminId)
+        public async Task<IActionResult> Delete(int id, [FromHeader(Name = "X-Usuario-Id")] int usuarioId)
         {
-            var result = await _pagosService.AnulatePagosAsync(id, AdminId);
+            var result = await _pagosService.AnulatePagosAsync(id, usuarioId);
             if (!result.Success) return NotFound(result);
             return Ok(result);
         }
-
     }
 }

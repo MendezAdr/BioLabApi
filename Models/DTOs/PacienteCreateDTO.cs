@@ -19,6 +19,7 @@ namespace BioLabApi.Models.DTOs
 
         [Required]
         public DateTime FechaNacimiento { get; set; }
+        
         [Required]
         public string Sexo { get; set; } = "N/A";
     

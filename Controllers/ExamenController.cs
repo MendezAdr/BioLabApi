@@ -32,27 +32,27 @@ namespace BioLabAPI.Controllers
             if (!result.Success) return NotFound(result);
             return Ok(result);
         }
-
+        
         [HttpPost]
-        public async Task<IActionResult> Create([FromBody] ExamenCreateDTO examen, [FromQuery] int AdminId)
+        public async Task<IActionResult> Create([FromBody] ExamenCreateDTO examen, [FromHeader(Name = "X-Usuario-Id")] int usuarioId)
         {
-            var result = await _examenService.CreateExamenAsync(examen, AdminId);
+            var result = await _examenService.CreateExamenAsync(examen, usuarioId);
             if (!result.Success) return BadRequest(result);
             return Ok(result);
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] ExamenUpdateDTO examen, [FromQuery] int AdminId)
+        public async Task<IActionResult> Update(int id, [FromBody] ExamenUpdateDTO examen, [FromHeader(Name = "X-Usuario-Id")] int usuarioId)
         {
-            var result = await _examenService.UpdateExamenAsync(examen, AdminId, id);
+            var result = await _examenService.UpdateExamenAsync(examen, usuarioId, id);
             if (!result.Success) return BadRequest(result);
             return Ok(result);
         }
 
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id, [FromQuery] int AdminId)
+        public async Task<IActionResult> Delete(int id, [FromHeader(Name = "X-Usuario-Id")] int usuarioId)
         {
-            var result = await _examenService.DeleteExamenAsync(AdminId, id);
+            var result = await _examenService.DeleteExamenAsync(usuarioId, id);
             if (!result.Success) return BadRequest(result);
             return Ok(result);
         }
