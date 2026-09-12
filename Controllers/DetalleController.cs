@@ -3,7 +3,6 @@ using BioLabApi.Models;
 using BioLabApi.Services.Interfaces;
 using BioLabApi.Models.DTOs;
 
-
 namespace BioLabAPI.Controllers
 {
     [ApiController]
@@ -17,6 +16,10 @@ namespace BioLabAPI.Controllers
             _detalleService = detalleService;
         }
 
+        // ==========================================
+        // Metodos GET (Públicos)
+        // ==========================================
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetByOrdenId(int id)
         {
@@ -27,10 +30,16 @@ namespace BioLabAPI.Controllers
             }
             return Ok(detalle);
         }
+        
+        // ==========================================
+        // Metodos POST y PUT (Operaciones críticas)
+        // ==========================================
+
+        // CORRECCIÓN: Se agregó el identificador de usuario en los Headers
         [HttpPost]
-        public async Task<IActionResult> CreateDetalle([FromBody] DetalleCreateDTO detalle)
+        public async Task<IActionResult> CreateDetalle([FromBody] DetalleCreateDTO detalle, [FromHeader(Name = "X-Usuario-Id")] int usuarioId)
         {
-            var result = await _detalleService.CreateDetalleAsync(detalle);
+            var result = await _detalleService.CreateDetalleAsync(detalle, usuarioId); // Recuerda actualizar la interfaz IDetalleService en C#
             if (!result.Success)
             {
                 return BadRequest(result);
@@ -38,17 +47,16 @@ namespace BioLabAPI.Controllers
             return Ok(result);
         }
 
-
+        // CORRECCIÓN: Se cambió FromQuery por FromHeader y se estandarizó el nombre a usuarioId
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateDetalle(int id, [FromBody] DetalleUpdateDTO detalle, [FromQuery] int AdminId)
+        public async Task<IActionResult> UpdateDetalle(int id, [FromBody] DetalleUpdateDTO detalle, [FromHeader(Name = "X-Usuario-Id")] int usuarioId)
         {
-            var result = await _detalleService.UpdateDetalleAsync(detalle, AdminId, id);
+            var result = await _detalleService.UpdateDetalleAsync(detalle, usuarioId, id);
             if (!result.Success)
             {
                 return BadRequest(result);
             }
             return Ok(result);
         }
-
     }
 }
