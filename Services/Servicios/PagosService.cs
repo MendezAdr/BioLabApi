@@ -176,12 +176,20 @@ public class PagosService : IPagosService
 
     //metodos restantes
 
-    public async Task<OperationResult> CreateAddPagoAsync(PagoStandaloneCreateDTO pago)
-    {
+    public async Task<OperationResult> CreateAddPagoAsync(PagoStandaloneCreateDTO pago, int AdminId)
+    {   
         using var transaction = await _dbContext.Database.BeginTransactionAsync();
-
         try
         {
+
+        var admin = await _dbContext.Usuarios
+            .AsNoTracking()
+            .Include(u => u.Rol)
+            .FirstOrDefaultAsync(u => u.Id == AdminId);
+
+        var validPermisos = ValidatePermisos(admin);
+        if (!validPermisos.Success) return validPermisos;
+        
             // Agregamos el pago
             await _dbContext.Pagos.AddAsync(new PagosModel
             {
@@ -212,7 +220,7 @@ public class PagosService : IPagosService
     }
 
 
-    public async Task<OperationResult> UpdatePagoAsync(PagoUpdateDTO pago, int adminId)
+    public async Task<OperationResult> UpdatePagoAsync(PagoUpdateDTO pago, int adminId, int pagoId)
     {
         var admin = await _dbContext.Usuarios
             .AsNoTracking()
@@ -227,7 +235,7 @@ public class PagosService : IPagosService
         var pagoDb = await _dbContext.Pagos
             .Include(p => p.Orden)
             .ThenInclude(o => o.Pagos) // <-- Vital para el recálculo
-            .FirstOrDefaultAsync(p => p.Id == pago.Id);
+            .FirstOrDefaultAsync(p => p.Id == pagoId);
 
         if (pagoDb == null) return new OperationResult(false, "El pago no existe.");
 

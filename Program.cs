@@ -24,6 +24,7 @@ builder.Services.AddScoped<IExamenesService, ExamenesService>();
 builder.Services.AddScoped<IDetalleService, DetalleService>();
 builder.Services.AddScoped<IPagosService, PagosService>();
 builder.Services.AddScoped<IOrdenesService, OrdenesService>();
+builder.Services.AddScoped<IRolService, RolService>();
 
 // Registrar HttpClient para hacer peticiones limpias
 builder.Services.AddHttpClient();

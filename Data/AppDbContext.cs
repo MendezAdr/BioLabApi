@@ -21,25 +21,36 @@ public class AppDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
+        string dbPath;
 
-        //despues descomento esto para probar la ubicacion de la base de datos,
-        //por ahora necesito que sea local para borrarla y probarla.
+#if DEBUG
+        // ==============================================================
+        // MODO DESARROLLO (Tu entorno en Linux)
+        // ==============================================================
+        // Se guarda directamente en la carpeta del proyecto para que puedas
+        // borrarla fácilmente o revisarla con un visor de SQLite.
+        dbPath = "Laboratorio.db";
+#else
+        // ==============================================================
+        // MODO PRODUCCIÓN (El ejecutable final para Windows 11)
+        // ==============================================================
+        // Utilizamos LocalApplicationData (AppData\Local en Windows)
+        // Esta es la ruta oficial y segura para bases de datos de aplicaciones de escritorio.
+        var appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+        var folder = Path.Combine(appData, "RIV_CARR_DATA_Production"); // Carpeta dedicada
+        
+        // Nos aseguramos de que la carpeta exista antes de que SQLite intente crear el archivo
+        if (!Directory.Exists(folder)) 
+        {
+            Directory.CreateDirectory(folder);
+        }
+        
+        dbPath = Path.Combine(folder, "Laboratorio.db");
+#endif
 
-
-        //var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
-        //var folder = Path.Combine(appData, "Laboratorio.Db");
-        //if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
-        //var dbPath = Path.Combine(folder, "Laboratorio.Db");
-
-
-
-        //options.UseSqlite($"Data Source = {dbPath}")
-        //.ConfigureWarnings(warnings => warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
-
-        options.UseSqlite("Data Source=Laboratorio.db")
+        options.UseSqlite($"Data Source={dbPath}")
             .LogTo(Console.WriteLine, Microsoft.Extensions.Logging.LogLevel.Information)
-           // 2. Muestra los valores reales (ej: pacienteId = 1) en vez de ocultarlos por seguridad
-           .EnableSensitiveDataLogging()
+            .EnableSensitiveDataLogging()
             .ConfigureWarnings(warnings => warnings.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.PendingModelChangesWarning));
     }
 

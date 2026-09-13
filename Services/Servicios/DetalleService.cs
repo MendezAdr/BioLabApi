@@ -109,11 +109,19 @@ private readonly AppDbContext _context;
 
 
     // crear un detalle
-    public async Task<OperationResult> CreateDetalleAsync(DetalleCreateDTO detalle)
+    public async Task<OperationResult> CreateDetalleAsync(DetalleCreateDTO detalle, int AdminId)
     {
                 
         try
         {
+            var adminValidate = await _context.Usuarios
+                .Include(u => u.Rol)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == AdminId);
+            var permisosCheck = ValidatePermisos(adminValidate);
+            if (!permisosCheck.Success) return permisosCheck;
+
+            
             _context.Detalles.Add(new DetalleModel
             {
                 ExamenId = detalle.ExamenId,

@@ -216,9 +216,15 @@ public class PacienteService : IPacientesService
     }
 
     //actualiza un paciente existente
-    public async Task<OperationResult> UpdateAsync(PacienteUpdateDTO paciente, int userId)
+    public async Task<OperationResult> UpdateAsync(PacienteUpdateDTO paciente, int userId, int adminId)
     {
-        
+        var adminValidate = await _appDbContext.Usuarios.FindAsync(adminId);
+        var permisosResult = ValidatePermisos(adminValidate);
+        if (!permisosResult.Success)
+        {
+            return permisosResult;
+        }
+
         var pacienteDb = await _appDbContext.Pacientes.FindAsync(paciente.Id);
         if (pacienteDb == null)
             return new OperationResult(false, "El paciente a modificar no existe.");

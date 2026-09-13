@@ -12,8 +12,8 @@ public interface IPacientesService
     Task<ObjectOperationResult> GetByApellidoAsync(string apellido);
     Task<ObjectOperationResult> GetByCedulaAsync(string cedula);
     
-    Task<OperationResult> CreateAsync(PacienteCreateDTO paciente, int userId);
-    Task<OperationResult> UpdateAsync(PacienteUpdateDTO paciente, int userId);
+    Task<OperationResult> CreateAsync(PacienteCreateDTO paciente, int AdminId);
+    Task<OperationResult> UpdateAsync(PacienteUpdateDTO paciente, int userId, int adminId);
     Task<OperationResult> DeactivateAsync(int id, int adminId);
     Task<OperationResult> ActivateAsync(int id, int adminId, bool state);
     

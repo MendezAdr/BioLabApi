@@ -25,16 +25,19 @@ public class RolModel
 
          
          */
-        Todos = 0,
-        CrearOrdenesYDetalles = 1,
-        GestionarUsuarios = 2,
-        ModificarOrdenesYDetalles = 4,
+
+        Ninguno = 0,
+        GestionarExamenes = 1,
+        GestionarPresupuestos = 2,
+        GestionarPacientes = 4,
         GestionarPagos = 8,
-        GestionarPacientes = 16,
-        GestionarExamenes = 32,
-        Totalizar = 64,
+        Totalizar = 16,
+        CrearOrdenesYDetalles = 32,
+        ModificarOrdenesYDetalles = 64,
         VerReportesAntiguos = 128,
-        GestionarPresupuestos = 256,
+        GestionarUsuarios = 256,
+        Todos = 511
+        
 
     }
 }
