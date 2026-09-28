@@ -1,9 +1,7 @@
-﻿using BioLabApi.Models;
-using BioLabApi.Models.DTOs;
+﻿using BioLabApi.Models.DTOs;
 using BioLabApi.Services.Interfaces;
+using BioLabApi.Helpers; // Asegura que este namespace apunte a donde están tus OperationResult
 using Microsoft.AspNetCore.Mvc;
-using System;
-using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace BioLabApi.Controllers
@@ -14,98 +12,78 @@ namespace BioLabApi.Controllers
     {
         private readonly IRolService _rolService;
 
-        // Inyectamos la interfaz que creaste
         public RolesController(IRolService rolService)
         {
             _rolService = rolService;
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<RolResponseDTO>>> GetAllRoles()
+        public async Task<IActionResult> GetAllRoles()
         {
-            var roles = await _rolService.GetAllRolesAsync();
-            return Ok(roles);
+            var result = await _rolService.GetAllRolesAsync();
+            
+            if (!result.Success) return BadRequest(result);
+            
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
-        public async Task<ActionResult<RolResponseDTO>> GetRolById(int id)
+        public async Task<IActionResult> GetRolById(int id)
         {
-            var rol = await _rolService.GetRolByIdAsync(id);
+            var result = await _rolService.GetRolByIdAsync(id);
             
-            if (rol == null)
-            {
-                return NotFound(new { message = $"No se encontró un rol con el ID {id}." });
-            }
+            if (!result.Success) return NotFound(result);
 
-            return Ok(rol);
+            return Ok(result);
         }
 
         [HttpPost]
-        public async Task<ActionResult<RolResponseDTO>> CreateRol([FromBody] RolCreateDTO rolCreateDto)
+        public async Task<IActionResult> CreateRol([FromBody] RolCreateDTO rolCreateDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            try
-            {
-                var nuevoRol = await _rolService.CreateRolAsync(rolCreateDto);
-                // Retornamos el DTO creado junto con la URL para acceder a él (código 201 Created)
-                return CreatedAtAction(nameof(GetRolById), new { id = nuevoRol.Id }, nuevoRol);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+            var result = await _rolService.CreateRolAsync(rolCreateDto);
+            
+            if (!result.Success) return BadRequest(result);
+
+            return Ok(result);
         }
 
         [HttpPut("{id}")]
-        public async Task<ActionResult<RolResponseDTO>> UpdateRol(int id, [FromBody] RolUpdateDto rolUpdateDto)
+        public async Task<IActionResult> UpdateRol(int id, [FromBody] RolUpdateDto rolUpdateDto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            // Verificamos que el ID de la ruta coincida con el ID del cuerpo[cite: 55]
+            // Mantenemos la consistencia devolviendo un ObjectOperationResult si falla esta validación inicial
             if (id != rolUpdateDto.Id)
             {
-                return BadRequest(new { message = "El ID de la ruta no coincide con el ID del objeto a actualizar." });
+                return BadRequest(new ObjectOperationResult(false, "El ID de la ruta no coincide con el ID del objeto a actualizar.", null));
             }
 
-            try
+            var result = await _rolService.UpdateRolAsync(rolUpdateDto);
+            
+            if (!result.Success)
             {
-                var rolActualizado = await _rolService.UpdateRolAsync(rolUpdateDto);
-                return Ok(rolActualizado);
+                if (result.Message.Contains("no encontrado")) return NotFound(result);
+                return BadRequest(result);
             }
-            catch (KeyNotFoundException ex)
-            {
-                return NotFound(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
+
+            return Ok(result);
         }
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRol(int id)
         {
-            try
+            var result = await _rolService.DeleteRolAsync(id);
+            
+            if (!result.Success)
             {
-                var eliminado = await _rolService.DeleteRolAsync(id);
-                
-                if (!eliminado)
-                {
-                    return NotFound(new { message = $"No se encontró el rol con ID {id}." });
-                }
+                if (result.Message.Contains("no encontrado")) return NotFound(result);
+                // Retornamos BadRequest con el OperationResult intacto si falla por restricciones (ej. usuarios activos)
+                return BadRequest(result); 
+            }
 
-                return Ok(new { message = "Rol eliminado correctamente." });
-            }
-            catch (InvalidOperationException ex)
-            {
-                // Este catch atrapa el error si intentan borrar un rol que tiene usuarios asignados
-                return Conflict(new { message = ex.Message });
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, new { message = "Ocurrió un error interno del servidor.", details = ex.Message });
-            }
+            return Ok(result);
         }
     }
 }

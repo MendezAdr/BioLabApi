@@ -11,20 +11,7 @@ public class RolModel
     [Flags] // importante, colocar mas permisos, ser mas especifico.
     public enum PermisosSistema
     {
-        /* 
-        Todos = 0,
-        CrearOrdenesYDetalles = 1,
-        GestionarUsuarios = 2, 
-        ModificarOrdenesYDetalles = 4,
-        GestionarPagos = 8,
-        GestionarPacientes = 16,
-        GestionarExamenes = 32,
-        Totalizar = 64,     
-        VerReportesAntiguos = 128,
-        GestionarPresupuestos = 256,
-
-         
-         */
+        
 
         Ninguno = 0,
         GestionarExamenes = 1,

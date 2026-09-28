@@ -151,14 +151,20 @@ private readonly AppDbContext _context;
         var permisosCheck = ValidatePermisos(adminValidate);
         if (!permisosCheck.Success) return permisosCheck;
         try
-        {
-            _context.Detalles.Update(new DetalleModel
+        {   
+            var detalleDb = await _context.Detalles.FindAsync(detalleId);
+            if (detalleDb == null) return new OperationResult(false, "El detalle no existe.");
+
+            detalleDb.ExamenId = detalle.ExamenId;
+            detalleDb.PrecioMomentoDivisa = detalle.PrecioMomentoDivisa;
+            
+            /* _context.Detalles.Update(new DetalleModel
             {
                 Id = detalle.Id,
                 OrdenId = detalle.OrdenId,
                 ExamenId = detalle.ExamenId,
                 PrecioMomentoDivisa = detalle.PrecioMomentoDivisa
-            });
+            }); */
             await _context.SaveChangesAsync();
             return new OperationResult(true, "Detalle actualizado exitosamente");
         }

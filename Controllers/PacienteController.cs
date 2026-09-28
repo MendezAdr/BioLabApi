@@ -84,7 +84,8 @@ namespace BioLabAPI.Controllers
         // CORRECCIÓN: Usar Cabecera
         [HttpPatch("{id}/Desactivar")]
         public async Task<IActionResult> Deactivate(int id, [FromHeader(Name = "X-Usuario-Id")] int usuarioId )
-        {
+        {   
+            
             var result = await _pacienteService.DeactivateAsync(id, usuarioId);
             if (!result.Success) return BadRequest(result);
             return Ok(result);

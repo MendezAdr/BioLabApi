@@ -14,6 +14,7 @@
 
         public string NombreAcompañante { get; set; } = "N/A";
         public string CedulaAcompañante { get; set; } = "N/A";
+        public bool IsActive {get; set;}
 
 
     }

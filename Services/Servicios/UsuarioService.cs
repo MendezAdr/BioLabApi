@@ -32,10 +32,23 @@ public class UsuarioService : IUsuarioService
             .FirstOrDefaultAsync(a => a.Username == username);
         if (UserExist == null) return new ObjectOperationResult(false, "El Nombre de Usuario no existe, verifique e intente nuevamente.", null);
 
-        var ValidPass = VerifyPassword(UserExist.Contrasena, password);
+        var ValidPass = VerifyPassword(password, UserExist.Contrasena);
         if (!ValidPass) return new ObjectOperationResult(false, "Contrasena incorrecta, intente nuevamente", null);
 
-        return new ObjectOperationResult(true, "Bienvenido", UserExist);
+        var usuarioLimpio = new UsuarioResponseDTO
+        {
+            Id = UserExist.Id,
+            Username = UserExist.Username,
+            Nombre = UserExist.Nombre,
+            Apellido = UserExist.Apellido,
+            Cedula = UserExist.Cedula,
+            IsActive = UserExist.IsActive,
+            RolName = UserExist.Rol.RolName, // Extraemos solo el string, rompiendo el ciclo infinito
+            
+            // Si en un futuro agregas 'Permisos' al UsuarioResponseDTO, lo mapearías aquí:
+            permisosSistema = UserExist.Rol.Permisos
+        };
+        return new ObjectOperationResult(true, "Bienvenido", usuarioLimpio);
         //el resto de la logica de esto no corresponde a un servicio.
     }
     
@@ -115,6 +128,7 @@ public class UsuarioService : IUsuarioService
                 Apellido = User.Apellido,
                 Cedula = User.Cedula,
                 RolName = User.Rol.RolName,
+                RolId = User.RolId,
                 IsActive = User.IsActive
             });
         }
@@ -291,6 +305,7 @@ public class UsuarioService : IUsuarioService
                     Apellido = u.Apellido,
                     Cedula = u.Cedula,
                     RolName = u.Rol.RolName,
+                    RolId = u.RolId,
                     IsActive = u.IsActive
                 })
                 .ToListAsync();

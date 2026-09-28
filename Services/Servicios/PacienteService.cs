@@ -32,6 +32,7 @@ public class PacienteService : IPacientesService
                 FechaNacimiento = p.FechaNacimiento,
                 Sexo = p.Sexo,
                 Direccion = p.Direccion,
+                IsActive = p.IsActive,
                 NombreAcompañante = p.NombreAcompañante,
                 CedulaAcompañante = p.CedulaAcompañante
        
@@ -59,6 +60,7 @@ public class PacienteService : IPacientesService
                     FechaNacimiento = p.FechaNacimiento,
                     Sexo = p.Sexo,
                     Direccion = p.Direccion,
+                    IsActive = p.IsActive,
                     NombreAcompañante = p.NombreAcompañante,
                     CedulaAcompañante = p.CedulaAcompañante
                 })
@@ -95,6 +97,7 @@ public class PacienteService : IPacientesService
                     FechaNacimiento = p.FechaNacimiento,
                     Sexo = p.Sexo,
                     Direccion = p.Direccion,
+                    IsActive = p.IsActive,
                     NombreAcompañante = p.NombreAcompañante,
                     CedulaAcompañante = p.CedulaAcompañante
                 })
@@ -127,6 +130,7 @@ public class PacienteService : IPacientesService
                     FechaNacimiento = p.FechaNacimiento,
                     Sexo = p.Sexo,
                     Direccion = p.Direccion,
+                    IsActive = p.IsActive,
                     NombreAcompañante = p.NombreAcompañante,
                     CedulaAcompañante = p.CedulaAcompañante
                 })
@@ -158,6 +162,7 @@ public class PacienteService : IPacientesService
                     FechaNacimiento = p.FechaNacimiento,
                     Sexo = p.Sexo,
                     Direccion = p.Direccion,
+                    IsActive = p.IsActive,
                     NombreAcompañante = p.NombreAcompañante,
                     CedulaAcompañante = p.CedulaAcompañante
                 })
@@ -181,6 +186,15 @@ public class PacienteService : IPacientesService
     public async Task<OperationResult> CreateAsync(PacienteCreateDTO paciente, int userId)
     {
         
+        var adminValidate = await _appDbContext.Usuarios
+            .Include(u => u.Rol) // <-- ¡Esta es la línea clave que falta!
+            .FirstOrDefaultAsync(u => u.Id == userId);
+        var permisosResult = ValidatePermisos(adminValidate);
+        if (!permisosResult.Success)
+        {
+            return permisosResult;
+        }
+
         if (await _appDbContext.Pacientes.AnyAsync(p => p.Cedula == paciente.Cedula))
         {
             return new OperationResult(false, "Ya existe un paciente con la misma cédula.");
@@ -218,7 +232,9 @@ public class PacienteService : IPacientesService
     //actualiza un paciente existente
     public async Task<OperationResult> UpdateAsync(PacienteUpdateDTO paciente, int userId, int adminId)
     {
-        var adminValidate = await _appDbContext.Usuarios.FindAsync(adminId);
+        var adminValidate = await _appDbContext.Usuarios
+            .Include(u => u.Rol) // <-- ¡Esta es la línea clave que falta!
+            .FirstOrDefaultAsync(u => u.Id == adminId);
         var permisosResult = ValidatePermisos(adminValidate);
         if (!permisosResult.Success)
         {
@@ -263,7 +279,13 @@ public class PacienteService : IPacientesService
     public async Task<OperationResult> DeactivateAsync(int id, int adminId) {
 
         try
-        {
+        {   
+            var adminValidate =  await _appDbContext.Usuarios
+                .Include(u => u.Rol)
+                .FirstOrDefaultAsync(u => u.Id == adminId);
+                var validatePermisos = ValidatePermisos(adminValidate);
+            if (!validatePermisos.Success) return validatePermisos;
+            
             var result = await ActivateAsync(id, adminId, false);
             return result;
         }
@@ -278,7 +300,9 @@ public class PacienteService : IPacientesService
     //reactiva un paciente por su id
     public async Task<OperationResult> ActivateAsync(int id, int adminId, bool state = true)
     {
-        var adminValidate = await _appDbContext.Usuarios.FindAsync(adminId);
+        var adminValidate = await _appDbContext.Usuarios
+        .Include(u => u.Rol)
+        .FirstOrDefaultAsync(a => a.Id == adminId);
         var permisosResult = ValidatePermisos(adminValidate);
         if (!permisosResult.Success)
         {
@@ -312,16 +336,16 @@ public class PacienteService : IPacientesService
     public OperationResult ValidatePermisos(UsuarioModel adminValidate)
     {
         if (adminValidate == null)
-        {
             return new OperationResult(false, "Usuario administrador no encontrado.");
-        }
+
+        // Evita el NullReferenceException si a alguien se le olvida el .Include() en el futuro
+        if (adminValidate.Rol == null)
+            return new OperationResult(false, "No se pudo cargar el rol del usuario.");
 
         if (!adminValidate.Rol.Permisos.HasFlag(RolModel.PermisosSistema.GestionarPacientes))
-        {
-            return new OperationResult(false, "El usuario no tiene permisos para gestionar pacientes.");
-        }
-
-        return new OperationResult(true, " ");
+            return new OperationResult(false, "No tienes permisos para modificar pacientes.");
+            
+        return new OperationResult(true, "");
     }
 
 
