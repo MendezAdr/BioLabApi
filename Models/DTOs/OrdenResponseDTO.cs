@@ -6,6 +6,8 @@ namespace BioLabApi.Models.DTOs
     {
         public int Id { get; set; }
         public int PacienteId { get; set; }
+
+        public string NombrePaciente {get; set;} = string.Empty;
         public DateTime FechaOrden { get; set; }
 
         public string NumeroFactura { get; set; } = string.Empty;

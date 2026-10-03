@@ -37,6 +37,7 @@ public class OrdenesService : IOrdenesService
                 .AsNoTracking()
                 .FirstOrDefaultAsync(o => o.Id == id);
 
+
             if (orden == null)
                 return new ObjectOperationResult(false, "La orden no existe.", null);
 
@@ -59,6 +60,7 @@ public class OrdenesService : IOrdenesService
             // EF Core armará los JOINs automáticamente gracias a la proyección .Select()
             var lista = await _context.Ordenes
                 .OrderByDescending(o => o.Fecha)
+                .Include(o => o.Paciente)
                 .AsNoTracking()
                 .Select(o => MapearOrdenADto(o))
                 .ToListAsync();
@@ -81,6 +83,7 @@ public class OrdenesService : IOrdenesService
 
             var lista = await _context.Ordenes
                 .Where(o => o.Fecha.Date >= inicio.Date && o.Fecha.Date <= fin.Date)
+                .Include(o => o.Paciente)
                 .AsNoTracking()
                 .Select(o => MapearOrdenADto(o))
                 .ToListAsync();
@@ -101,6 +104,7 @@ public class OrdenesService : IOrdenesService
 
         var lista = await _context.Ordenes
             .Where(o => o.PacienteId == idPaciente)
+            .Include(o => o.Paciente)
             .AsNoTracking()
             .Select(o => MapearOrdenADto(o))
             .ToListAsync();
@@ -116,6 +120,7 @@ public class OrdenesService : IOrdenesService
 
         var lista = await _context.Ordenes
             .Where(o => o.Estado == estado)
+            .Include(o => o.Paciente)
             .AsNoTracking()
             .Select(o => MapearOrdenADto(o))
             .ToListAsync();
@@ -137,6 +142,7 @@ public class OrdenesService : IOrdenesService
             Estado = orden.Estado,
             NumeroFactura = orden.NumeroFactura,
             TotalDivisa = orden.TotalDivisa,
+            NombrePaciente = $"{orden.Paciente.Nombre} {orden.Paciente.Apellido}",
             
             
             Detalles = orden.Detalles.Select(d => new DetalleResponseDTO
