@@ -7,7 +7,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace BioLabApi.Models.DTOs
 {
-    public class RolResponseDTO
+    public class RolResponseDTO : AuditableResponseDTO
     {
         public int Id { get; set; }
         public string RolName { get; set; } = string.Empty;

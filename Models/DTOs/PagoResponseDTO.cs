@@ -1,6 +1,6 @@
 ﻿namespace BioLabApi.Models.DTOs
 {
-    public class PagoResponseDTO
+    public class PagoResponseDTO : AuditableResponseDTO
     {
         public int Id { get; set; }
         public int OrdenId { get; set; }

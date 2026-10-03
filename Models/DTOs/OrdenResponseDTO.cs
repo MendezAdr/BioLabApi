@@ -2,7 +2,7 @@
 
 namespace BioLabApi.Models.DTOs
 {
-    public class OrdenResponseDTO
+    public class OrdenResponseDTO : AuditableResponseDTO
     {
         public int Id { get; set; }
         public int PacienteId { get; set; }

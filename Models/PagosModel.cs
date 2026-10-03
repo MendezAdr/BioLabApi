@@ -4,7 +4,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-public class PagosModel
+public class PagosModel : Auditable
 {
     /*
      * se sobre entiende que un pago es una

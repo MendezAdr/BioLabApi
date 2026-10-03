@@ -33,6 +33,10 @@ public class PacienteService : IPacientesService
                 Sexo = p.Sexo,
                 Direccion = p.Direccion,
                 IsActive = p.IsActive,
+                CreadoPorId = p.CreadoPorId,
+                ModificadoPorId = p.ModificadoPorId,
+                FechaCreacion = p.FechaCreacion,
+                FechaModificacion = p.FechaModificacion,
                 NombreAcompañante = p.NombreAcompañante,
                 CedulaAcompañante = p.CedulaAcompañante
        
@@ -61,6 +65,10 @@ public class PacienteService : IPacientesService
                     Sexo = p.Sexo,
                     Direccion = p.Direccion,
                     IsActive = p.IsActive,
+                    CreadoPorId = p.CreadoPorId,
+                    ModificadoPorId = p.ModificadoPorId,
+                    FechaCreacion = p.FechaCreacion,
+                    FechaModificacion = p.FechaModificacion,
                     NombreAcompañante = p.NombreAcompañante,
                     CedulaAcompañante = p.CedulaAcompañante
                 })
@@ -99,7 +107,11 @@ public class PacienteService : IPacientesService
                     Direccion = p.Direccion,
                     IsActive = p.IsActive,
                     NombreAcompañante = p.NombreAcompañante,
-                    CedulaAcompañante = p.CedulaAcompañante
+                    CedulaAcompañante = p.CedulaAcompañante,
+                    CreadoPorId = p.CreadoPorId,
+                    ModificadoPorId = p.ModificadoPorId,
+                    FechaCreacion = p.FechaCreacion,
+                    FechaModificacion = p.FechaModificacion
                 })
                 .FirstOrDefaultAsync();
             if (paciente == null) return new ObjectOperationResult(false, "Paciente no encontrado.", null);
@@ -131,6 +143,10 @@ public class PacienteService : IPacientesService
                     Sexo = p.Sexo,
                     Direccion = p.Direccion,
                     IsActive = p.IsActive,
+                    CreadoPorId = p.CreadoPorId,
+                    ModificadoPorId = p.ModificadoPorId,
+                    FechaCreacion = p.FechaCreacion,
+                    FechaModificacion = p.FechaModificacion,
                     NombreAcompañante = p.NombreAcompañante,
                     CedulaAcompañante = p.CedulaAcompañante
                 })
@@ -163,6 +179,10 @@ public class PacienteService : IPacientesService
                     Sexo = p.Sexo,
                     Direccion = p.Direccion,
                     IsActive = p.IsActive,
+                    CreadoPorId = p.CreadoPorId,
+                    ModificadoPorId = p.ModificadoPorId,
+                    FechaCreacion = p.FechaCreacion,
+                    FechaModificacion = p.FechaModificacion,
                     NombreAcompañante = p.NombreAcompañante,
                     CedulaAcompañante = p.CedulaAcompañante
                 })

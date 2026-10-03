@@ -45,6 +45,7 @@ public class UsuarioService : IUsuarioService
             IsActive = UserExist.IsActive,
             RolName = UserExist.Rol.RolName, // Extraemos solo el string, rompiendo el ciclo infinito
             
+
             // Si en un futuro agregas 'Permisos' al UsuarioResponseDTO, lo mapearías aquí:
             permisosSistema = UserExist.Rol.Permisos
         };
@@ -129,7 +130,11 @@ public class UsuarioService : IUsuarioService
                 Cedula = User.Cedula,
                 RolName = User.Rol.RolName,
                 RolId = User.RolId,
-                IsActive = User.IsActive
+                IsActive = User.IsActive,
+                CreadoPorId = User.CreadoPorId,
+                FechaCreacion = User.FechaCreacion,
+                ModificadoPorId = User.ModificadoPorId,
+                FechaModificacion = User.FechaModificacion,
             });
         }
         catch (Exception e)
@@ -306,7 +311,11 @@ public class UsuarioService : IUsuarioService
                     Cedula = u.Cedula,
                     RolName = u.Rol.RolName,
                     RolId = u.RolId,
-                    IsActive = u.IsActive
+                    IsActive = u.IsActive,
+                    CreadoPorId = u.CreadoPorId,
+                    FechaCreacion = u.FechaCreacion,
+                    ModificadoPorId = u.ModificadoPorId,
+                    FechaModificacion = u.FechaModificacion,
                 })
                 .ToListAsync();
 

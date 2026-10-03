@@ -2,7 +2,7 @@
 namespace BioLabApi.Models.DTOs;
 
 
-public class UsuarioResponseDTO
+public class UsuarioResponseDTO: AuditableResponseDTO
 {
     public int Id { get; set; }
     public string Username { get; set; } = string.Empty;

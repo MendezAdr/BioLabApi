@@ -26,7 +26,11 @@ public class PagosService : IPagosService
                     OrdenId = p.OrdenId,
                     Metodo = p.Metodo,
                     Monto = p.Monto,
-                    Referencia = p.Referencia
+                    Referencia = p.Referencia,
+                    CreadoPorId = p.CreadoPorId,
+                    ModificadoPorId = p.ModificadoPorId,
+                    FechaCreacion = p.FechaCreacion,
+                    FechaModificacion = p.FechaModificacion
                 })
                 .AsNoTracking()
                 .ToListAsync();
@@ -54,7 +58,11 @@ public class PagosService : IPagosService
                 OrdenId = pago.OrdenId,
                 Metodo = pago.Metodo,
                 Monto = pago.Monto,
-                Referencia = pago.Referencia
+                Referencia = pago.Referencia,
+                CreadoPorId = pago.CreadoPorId,
+                ModificadoPorId = pago.ModificadoPorId,
+                FechaCreacion = pago.FechaCreacion,
+                FechaModificacion = pago.FechaModificacion
             });
         }
         catch (Exception e)
@@ -78,7 +86,11 @@ public class PagosService : IPagosService
                 OrdenId = pago.OrdenId,
                 Metodo = pago.Metodo,
                 Monto = pago.Monto,
-                Referencia = pago.Referencia
+                Referencia = pago.Referencia,
+                CreadoPorId = pago.CreadoPorId,
+                ModificadoPorId = pago.ModificadoPorId,
+                FechaCreacion = pago.FechaCreacion,
+                FechaModificacion = pago.FechaModificacion
             });
         }
         catch (Exception e)
@@ -105,7 +117,11 @@ public class PagosService : IPagosService
                 OrdenId = p.OrdenId,
                 Metodo = p.Metodo,
                 Monto = p.Monto,
-                Referencia = p.Referencia
+                Referencia = p.Referencia,
+                CreadoPorId = p.CreadoPorId,
+                ModificadoPorId = p.ModificadoPorId,
+                FechaCreacion = p.FechaCreacion,
+                FechaModificacion = p.FechaModificacion
             }).ToList();
 
             return new ListOperationResult<PagoResponseDTO?>(true, "", pagoResponses);
@@ -136,7 +152,11 @@ public class PagosService : IPagosService
                 Id = p.Id,
                 Monto = p.Monto,
                 Metodo = p.Metodo,
-                Referencia = p.Referencia
+                Referencia = p.Referencia,
+                CreadoPorId = p.CreadoPorId,
+                ModificadoPorId = p.ModificadoPorId,
+                FechaCreacion = p.FechaCreacion,
+                FechaModificacion = p.FechaModificacion
             }).ToList();
             return new ListOperationResult<PagoResponseDTO>(true, "", pagosResponseDTOs);
 
@@ -162,7 +182,11 @@ public class PagosService : IPagosService
                 Id = p.Id,
                 Monto = p.Monto,
                 Metodo = p.Metodo,
-                Referencia = p.Referencia
+                Referencia = p.Referencia,
+                CreadoPorId = p.CreadoPorId,
+                ModificadoPorId = p.ModificadoPorId,
+                FechaCreacion = p.FechaCreacion,
+                FechaModificacion = p.FechaModificacion
             }).ToList();
 
             return new ListOperationResult<PagoResponseDTO>(true, "", pagosResponseDTOs);

@@ -128,40 +128,6 @@ public class OrdenesService : IOrdenesService
         return new ListOperationResult<OrdenResponseDTO>(true, "", lista);
     }
 
-    // ==========================================
-    // HELPER DE MAPEO CENTRALIZADO
-    // ==========================================
-    // Esto previene que olvides mapear un campo en el futuro.
-    private static OrdenResponseDTO MapearOrdenADto(OrdenesModel orden)
-    {
-        return new OrdenResponseDTO
-        {
-            Id = orden.Id,
-            PacienteId = orden.PacienteId,
-            FechaOrden = orden.Fecha,
-            Estado = orden.Estado,
-            NumeroFactura = orden.NumeroFactura,
-            TotalDivisa = orden.TotalDivisa,
-            NombrePaciente = $"{orden.Paciente.Nombre} {orden.Paciente.Apellido}",
-            
-            
-            Detalles = orden.Detalles.Select(d => new DetalleResponseDTO
-            {
-                Id = d.Id,
-                ExamenId = d.ExamenId,
-                PrecioMomentoDivisa = d.PrecioMomentoDivisa,
-                ExamenNombre = d.Examen != null ? d.Examen.NombreExamen : "Desconocido" // <- CORRECCIÓN: Nombre real
-            }).ToList(),
-            
-            Pagos = orden.Pagos.Select(p => new PagoResponseDTO
-            {
-                Id = p.Id,
-                Metodo = p.Metodo,
-                Monto = p.Monto,
-                Referencia = p.Referencia
-            }).ToList()
-        };
-    }
 
     // ==========================================
     // MÉTODOS DE CREACIÓN Y ACTUALIZACIÓN (Se mantienen iguales)
@@ -404,5 +370,51 @@ public class OrdenesService : IOrdenesService
         }
 
         return new OperationResult(true, " ");
+    }
+    // ==========================================
+    // HELPER DE MAPEO CENTRALIZADO
+    // ==========================================
+    // Esto previene que olvides mapear un campo en el futuro.
+    private static OrdenResponseDTO MapearOrdenADto(OrdenesModel orden)
+    {
+        return new OrdenResponseDTO
+        {
+            Id = orden.Id,
+            PacienteId = orden.PacienteId,
+            FechaOrden = orden.Fecha,
+            Estado = orden.Estado,
+            NumeroFactura = orden.NumeroFactura,
+            TotalDivisa = orden.TotalDivisa,
+            NombrePaciente = $"{orden.Paciente.Nombre} {orden.Paciente.Apellido}",
+            CreadoPorId = orden.CreadoPorId,
+            FechaCreacion = orden.FechaCreacion,
+            ModificadoPorId = orden.ModificadoPorId,
+            FechaModificacion = orden.FechaModificacion,
+            
+            
+            Detalles = orden.Detalles.Select(d => new DetalleResponseDTO
+            {
+                Id = d.Id,
+                ExamenId = d.ExamenId,
+                PrecioMomentoDivisa = d.PrecioMomentoDivisa,
+                CreadoPorId = d.CreadoPorId,
+                FechaCreacion = d.FechaCreacion,
+                ModificadoPorId = d.ModificadoPorId,
+                FechaModificacion = d.FechaModificacion,
+                ExamenNombre = d.Examen != null ? d.Examen.NombreExamen : "Desconocido" // <- CORRECCIÓN: Nombre real
+            }).ToList(),
+            
+            Pagos = orden.Pagos.Select(p => new PagoResponseDTO
+            {
+                Id = p.Id,
+                Metodo = p.Metodo,
+                Monto = p.Monto,
+                Referencia = p.Referencia,
+                CreadoPorId = p.CreadoPorId,
+                FechaCreacion = p.FechaCreacion,
+                ModificadoPorId = p.ModificadoPorId,
+                FechaModificacion = p.FechaModificacion
+            }).ToList()
+        };
     }
 }

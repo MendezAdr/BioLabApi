@@ -1,10 +1,10 @@
 ﻿namespace BioLabApi.Models.DTOs
 {
-    public class PacienteResponseDTO
+    public class PacienteResponseDTO: AuditableResponseDTO
     {
         public int Id { get; set; }
-        public string Nombre { get; set; }
-        public string Apellido { get; set; }
+        public string Nombre { get; set; } = string.Empty;
+        public string Apellido { get; set; } = string.Empty;
         public string Cedula { get; set; } = string.Empty;
         public string Telefono { get; set; } = "N/A";
 

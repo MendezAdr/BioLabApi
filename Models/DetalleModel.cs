@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace BioLabApi.Models;
-public class DetalleModel
+public class DetalleModel : Auditable
 { /*
    * el detalle es la relacion entre una orden y un examen especifico,
    * es decir, cada detalle representa un examen que se vendio en una orden, 
