@@ -220,7 +220,11 @@ public class PagosService : IPagosService
                 OrdenId = pago.OrdenId,
                 Monto = pago.Monto,
                 Referencia = pago.Referencia,
-                Metodo = pago.Metodo
+                Metodo = pago.Metodo,
+                ModificadoPorId = AdminId,
+                FechaModificacion = DateTime.Now,
+                CreadoPorId = AdminId,
+                FechaCreacion = DateTime.Now
             });
 
             // CRÍTICO: Necesitamos cargar la orden y TODOS sus pagos (incluyendo el nuevo) para recalcular
@@ -270,6 +274,8 @@ public class PagosService : IPagosService
             pagoDb.Monto = pago.Monto;
             pagoDb.Referencia = pago.Referencia;
             pagoDb.Metodo = pago.Metodo;
+            pagoDb.ModificadoPorId = adminId;
+            pagoDb.FechaModificacion = DateTime.Now;
 
             // Recálculo automático reutilizando tu método
             SincronizarPagosConOrden(pagoDb.Orden);
