@@ -10,14 +10,14 @@ namespace BioLabApi.Models.DTOs
         public int Id { get; set; }
 
         [Required]
-        [MaxLength(10)]
+        [MaxLength(50)]
         public string Nombre { get; set; } = string.Empty;
         [Required]
-        [MaxLength(15)]
+        [MaxLength(50)]
         public string Apellido { get; set; } = string.Empty;
 
         [Required]
-        [MaxLength(10)]
+        [MaxLength(15)]
         public string Cedula { get; set; } = string.Empty;
 
         [MaxLength(15)]
@@ -35,7 +35,7 @@ namespace BioLabApi.Models.DTOs
         [MaxLength(50)]
         public string NombreAcompañante { get; set; } = "N/A";
 
-        [MaxLength(10)]
+        [MaxLength(15)]
         public string CedulaAcompañante { get; set; } = "N/A";
     }
 }

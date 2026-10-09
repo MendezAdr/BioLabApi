@@ -171,6 +171,16 @@ public class AppDbContext : DbContext
                 Referencia = "000123456",
                 CreadoPorId = 1,
                 FechaCreacion = fechaSeed
+            },
+            new PagosModel
+            {
+                Id = 2,
+                OrdenId = 1,
+                Metodo = PagosModel.MetodoPago.PagoMovil,
+                Monto = 17.50m, // Paga 20, queda debiendo 17.50
+                Referencia = "000123456",
+                CreadoPorId = 1,
+                FechaCreacion = fechaSeed
             }
         );
 

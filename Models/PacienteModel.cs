@@ -12,13 +12,13 @@ public class PacienteModel : Auditable
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     [Required]
-    [MaxLength(20)]
+    [MaxLength(50)]
     public string Nombre { get; set; } = string.Empty;
     [Required]
-    [MaxLength(20)]
+    [MaxLength(50)]
     public string Apellido {get; set;} = string.Empty;
     [Required]
-    [MaxLength(10)]
+    [MaxLength(15)]
     public string Cedula { get; set; } = string.Empty;
 
     [Required]

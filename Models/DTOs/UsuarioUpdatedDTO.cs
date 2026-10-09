@@ -10,7 +10,7 @@ public class UsuarioUpdateDTO
     public int Id { get; set; }
 
     [Required(ErrorMessage = "El nombre de usuario es obligatorio.")]
-    [MaxLength(20)]
+    [MaxLength(25, ErrorMessage = "El nombre de usuario no puede exceder los 25 caracteres.")]
     public string Username { get; set; } = string.Empty;
 
     [Required]

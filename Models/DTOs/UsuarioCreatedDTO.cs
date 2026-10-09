@@ -7,7 +7,7 @@ public class UsuarioCreateDTO
 {
     // Usamos DataAnnotations en el DTO para validar antes de que llegue al servicio
     [Required(ErrorMessage = "El nombre de usuario es obligatorio.")]
-    [MaxLength(20, ErrorMessage = "El nombre de usuario no puede exceder los 20 caracteres.")]
+    [MaxLength(25, ErrorMessage = "El nombre de usuario no puede exceder los 25 caracteres.")]
     public string Username { get; set; } = string.Empty;
 
     [Required]
