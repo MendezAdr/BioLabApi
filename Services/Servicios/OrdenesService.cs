@@ -61,6 +61,7 @@ public class OrdenesService : IOrdenesService
             var lista = await _context.Ordenes
                 .OrderByDescending(o => o.Fecha)
                 .Include(o => o.Paciente)
+                .Include(o => o.Pagos)
                 .AsNoTracking()
                 .Select(o => MapearOrdenADto(o))
                 .ToListAsync();
@@ -84,6 +85,7 @@ public class OrdenesService : IOrdenesService
             var lista = await _context.Ordenes
                 .Where(o => o.Fecha.Date >= inicio.Date && o.Fecha.Date <= fin.Date)
                 .Include(o => o.Paciente)
+                .Include(o => o.Pagos)
                 .AsNoTracking()
                 .Select(o => MapearOrdenADto(o))
                 .ToListAsync();
@@ -105,6 +107,7 @@ public class OrdenesService : IOrdenesService
         var lista = await _context.Ordenes
             .Where(o => o.PacienteId == idPaciente)
             .Include(o => o.Paciente)
+            .Include(o => o.Pagos)
             .AsNoTracking()
             .Select(o => MapearOrdenADto(o))
             .ToListAsync();
@@ -121,6 +124,7 @@ public class OrdenesService : IOrdenesService
         var lista = await _context.Ordenes
             .Where(o => o.Estado == estado)
             .Include(o => o.Paciente)
+            .Include(o => o.Pagos)
             .AsNoTracking()
             .Select(o => MapearOrdenADto(o))
             .ToListAsync();
@@ -128,6 +132,23 @@ public class OrdenesService : IOrdenesService
         return new ListOperationResult<OrdenResponseDTO>(true, "", lista);
     }
 
+    public async Task<ListOperationResult<OrdenResponseDTO>> GetAllUnpaidOrdersAsync(int AdminId)
+    {
+        var admin = await _context.Usuarios.Include(u => u.Rol).AsNoTracking().FirstOrDefaultAsync(u => u.Id == AdminId);
+        var validacion = ValidatePermisos(admin);
+        if (!validacion.Success) return new ListOperationResult<OrdenResponseDTO>(false, validacion.Message, null);
+
+        var lista = await _context.Ordenes
+            .Where(o => o.Estado == OrdenesModel.EstadoPago.Parcial || o.Estado == OrdenesModel.EstadoPago.Pendiente)
+            .Include(o => o.Paciente)
+            .Include(o => o.Pagos)
+            .AsNoTracking()
+            .Select(o => MapearOrdenADto(o))
+            .ToListAsync();
+            
+        return new ListOperationResult<OrdenResponseDTO>(true, "", lista);
+
+    }
 
     // ==========================================
     // MÉTODOS DE CREACIÓN Y ACTUALIZACIÓN (Se mantienen iguales)
@@ -385,11 +406,13 @@ public class OrdenesService : IOrdenesService
             Estado = orden.Estado,
             NumeroFactura = orden.NumeroFactura,
             TotalDivisa = orden.TotalDivisa,
+            TasaBcv = orden.TasaBcv,
             NombrePaciente = $"{orden.Paciente.Nombre} {orden.Paciente.Apellido}",
             CreadoPorId = orden.CreadoPorId,
             FechaCreacion = orden.FechaCreacion,
             ModificadoPorId = orden.ModificadoPorId,
             FechaModificacion = orden.FechaModificacion,
+            
             
             
             Detalles = orden.Detalles.Select(d => new DetalleResponseDTO

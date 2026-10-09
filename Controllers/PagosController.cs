@@ -16,7 +16,6 @@ namespace BioLabAPI.Controllers
             _pagosService = pagosService;
         }
 
-        // NUEVO ENDPOINT: Para cargar la tabla principal de pagos en React
         [HttpGet]
         public async Task<IActionResult> GetAll()
         {
@@ -69,15 +68,17 @@ namespace BioLabAPI.Controllers
         public async Task<IActionResult> CreateAddPago([FromBody] PagoStandaloneCreateDTO pago, [FromHeader(Name = "X-Usuario-Id")] int usuarioId)
         {
             var result = await _pagosService.CreateAddPagoAsync(pago, usuarioId); 
-            if (!result.Success) return BadRequest(result); // Corregido a BadRequest
+            if (!result.Success) return BadRequest(result); 
             return Ok(result);
         }
 
         [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] PagoUpdateDTO pago, [FromHeader(Name = "X-Usuario-Id")] int usuarioId)
         {
-            var result = await _pagosService.UpdatePagoAsync(pago, id, usuarioId); 
-            if (!result.Success) return BadRequest(result); // Corregido a BadRequest
+            // CORRECCIÓN CLAVE: El orden correcto es (pago, adminId, pagoId)
+            var result = await _pagosService.UpdatePagoAsync(pago, usuarioId, id); 
+            
+            if (!result.Success) return BadRequest(result); 
             return Ok(result);
         }
 
@@ -85,7 +86,7 @@ namespace BioLabAPI.Controllers
         public async Task<IActionResult> Delete(int id, [FromHeader(Name = "X-Usuario-Id")] int usuarioId)
         {
             var result = await _pagosService.AnulatePagosAsync(id, usuarioId);
-            if (!result.Success) return BadRequest(result); // Corregido a BadRequest
+            if (!result.Success) return BadRequest(result); 
             return Ok(result);
         }
     }

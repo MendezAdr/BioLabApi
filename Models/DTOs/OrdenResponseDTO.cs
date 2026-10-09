@@ -14,6 +14,8 @@ namespace BioLabApi.Models.DTOs
 
         public decimal TotalDivisa { get; set; } = 0;
 
+        public decimal TasaBcv { get; set; } = 0;
+
         public OrdenesModel.EstadoPago Estado { get; set; }
 
         public List<DetalleResponseDTO> Detalles { get; set; } = new();

@@ -359,12 +359,13 @@ public class PagosService : IPagosService
 
 
     public ObjectOperationResult SincronizarPagosConOrden(OrdenesModel orden)
-    {
-        decimal totalPagadoDivisa = 0;
+    {decimal totalPagadoDivisa = 0;
         foreach (var pago in orden.Pagos)
         {
-            bool esBs = (int)pago.Metodo >= 1 && (int)pago.Metodo <= 4;
-            totalPagadoDivisa += esBs ? (pago.Monto / orden.TasaBcv) : pago.Monto;
+            // ELIMINAMOS LA DIVISIÓN.
+            // Como implementamos la bimodalidad, el frontend ya hizo el trabajo sucio
+            // y todo lo que llega a la BD ya está convertido a Dólares puros.
+            totalPagadoDivisa += pago.Monto; 
         }
         if (Math.Round(totalPagadoDivisa, 2) >= Math.Round(orden.TotalDivisa, 2))
             orden.Estado = OrdenesModel.EstadoPago.Pagado;

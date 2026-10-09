@@ -54,6 +54,14 @@ public class OrdenesController : ControllerBase
         return Ok(result);
     }
 
+    [HttpGet("unpaid/")]
+    public async Task<IActionResult> GetByUnpaid([FromRoute] OrdenesModel.EstadoPago estado, [FromHeader(Name = "X-Admin-Id")] int adminId)
+    {
+        var result = await _ordenesService.GetAllUnpaidOrdersAsync(adminId);
+        if (!result.Success) return NotFound(result);
+        return Ok(result);
+    }
+
     // RF-15: Procesar una nueva venta/orden completa
     [HttpPost]
     public async Task<IActionResult> Create([FromHeader(Name = "X-Usuario-Id")] int usuarioId, [FromBody] OrdenCreateDTO nuevaOrden)

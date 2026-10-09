@@ -24,22 +24,11 @@ public class AppDbContext : DbContext
         string dbPath;
 
 #if DEBUG
-        // ==============================================================
-        // MODO DESARROLLO (Tu entorno en Linux)
-        // ==============================================================
-        // Se guarda directamente en la carpeta del proyecto para que puedas
-        // borrarla fácilmente o revisarla con un visor de SQLite.
         dbPath = "Laboratorio.db";
 #else
-        // ==============================================================
-        // MODO PRODUCCIÓN (El ejecutable final para Windows 11)
-        // ==============================================================
-        // Utilizamos LocalApplicationData (AppData\Local en Windows)
-        // Esta es la ruta oficial y segura para bases de datos de aplicaciones de escritorio.
         var appData = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
-        var folder = Path.Combine(appData, "RIV_CARR_DATA_Production"); // Carpeta dedicada
+        var folder = Path.Combine(appData, "RIV_CARR_DATA_Production"); 
         
-        // Nos aseguramos de que la carpeta exista antes de que SQLite intente crear el archivo
         if (!Directory.Exists(folder)) 
         {
             Directory.CreateDirectory(folder);
@@ -56,56 +45,144 @@ public class AppDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        // 1. Seeding de Roles
-        // 2. Seeding de Usuario Administrador Inicial
+        // ==============================================================
+        // 1. SEEDING DE SEGURIDAD (Roles y Usuarios)
+        // ==============================================================
+        var fechaSeed = new DateTime(2026, 1, 1, 12, 0, 0); // Fecha estática para evitar migraciones fantasma
 
         modelBuilder.Entity<RolModel>().HasData(
             new RolModel
             {
                 Id = 1,
                 RolName = "Admin",
-                Permisos =
-                   RolModel.PermisosSistema.CrearOrdenesYDetalles |
-                   RolModel.PermisosSistema.GestionarUsuarios |
-                   RolModel.PermisosSistema.ModificarOrdenesYDetalles |
-                   RolModel.PermisosSistema.GestionarPagos |
-                   RolModel.PermisosSistema.GestionarExamenes |
-                   RolModel.PermisosSistema.GestionarPacientes |
-                   RolModel.PermisosSistema.Totalizar |
-                   RolModel.PermisosSistema.GestionarPresupuestos |
-                   RolModel.PermisosSistema.VerReportesAntiguos
-
+                Permisos = RolModel.PermisosSistema.Todos // Simplificado si ya tienes 'Todos'
             },
-
-
             new RolModel
             {
                 Id = 2,
-                RolName = "Usuario",
-                Permisos = RolModel.PermisosSistema.Totalizar
+                RolName = "Cajero",
+                Permisos = RolModel.PermisosSistema.Totalizar | RolModel.PermisosSistema.CrearOrdenesYDetalles | RolModel.PermisosSistema.GestionarPagos
             }
         );
+
         modelBuilder.Entity<UsuarioModel>().HasData(
             new UsuarioModel
             {
                 Id = 1,
                 Username = "admin",
                 Nombre = "Admin",
-                Apellido = "User",
-                Cedula = "00",
+                Apellido = "Principal",
+                Cedula = "V-0000000",
                 RolId = 1,
-                Contrasena = BCrypt.Net.BCrypt.HashPassword("admin123")
+                Contrasena = BCrypt.Net.BCrypt.HashPassword("admin123"),
+                IsActive = true,
+                CreadoPorId = 1,
+                FechaCreacion = fechaSeed
             }
         );
 
-        // 3. Relación Orden -> Detalles (¡Solo una vez!)
+        // ==============================================================
+        // 2. SEEDING DE OPERACIONES (Pacientes y Exámenes)
+        // ==============================================================
+        modelBuilder.Entity<PacienteModel>().HasData(
+            new PacienteModel
+            {
+                Id = 1,
+                Nombre = "Juan",
+                Apellido = "Pérez",
+                Cedula = "V-12345678",
+                FechaNacimiento = new DateTime(1990, 5, 15),
+                Sexo = "M",
+                Telefono = "0414-1234567",
+                Direccion = "Centro, Valera",
+                IsActive = true,
+                CreadoPorId = 1,
+                FechaCreacion = fechaSeed
+            }
+        );
+
+        modelBuilder.Entity<ExamenModel>().HasData(
+            new ExamenModel
+            {
+                Id = 1,
+                NombreExamen = "Hematología Completa",
+                CostoEnDivisa = 15.50m,
+                Descripcion = "Análisis de sangre estándar con fórmula leucocitaria.",
+                CreadoPorId = 1,
+                FechaCreacion = fechaSeed
+            },
+            new ExamenModel
+            {
+                Id = 2,
+                NombreExamen = "Perfil Lipídico",
+                CostoEnDivisa = 22.00m,
+                Descripcion = "Colesterol total, HDL, LDL y Triglicéridos.",
+                CreadoPorId = 1,
+                FechaCreacion = fechaSeed
+            }
+        );
+
+        // ==============================================================
+        // 3. SEEDING DE TRANSACCIONES (Órdenes, Detalles y Pagos)
+        // ==============================================================
+        modelBuilder.Entity<OrdenesModel>().HasData(
+            new OrdenesModel
+            {
+                Id = 1,
+                NumeroFactura = "ORD-10001",
+                PacienteId = 1,
+                TotalDivisa = 37.50m, // 15.50 + 22.00
+                TasaBcv = 36.50m,
+                Fecha = fechaSeed,
+                Estado = OrdenesModel.EstadoPago.Parcial, // Forzamos un pago parcial para probar tu vista de morosos
+                CreadoPorId = 1,
+                FechaCreacion = fechaSeed
+            }
+        );
+
+        modelBuilder.Entity<DetalleModel>().HasData(
+            new DetalleModel
+            {
+                Id = 1,
+                OrdenId = 1,
+                ExamenId = 1,
+                PrecioMomentoDivisa = 15.50m,
+                CreadoPorId = 1,
+                FechaCreacion = fechaSeed
+            },
+            new DetalleModel
+            {
+                Id = 2,
+                OrdenId = 1,
+                ExamenId = 2,
+                PrecioMomentoDivisa = 22.00m,
+                CreadoPorId = 1,
+                FechaCreacion = fechaSeed
+            }
+        );
+
+        modelBuilder.Entity<PagosModel>().HasData(
+            new PagosModel
+            {
+                Id = 1,
+                OrdenId = 1,
+                Metodo = PagosModel.MetodoPago.PagoMovil,
+                Monto = 20.00m, // Paga 20, queda debiendo 17.50
+                Referencia = "000123456",
+                CreadoPorId = 1,
+                FechaCreacion = fechaSeed
+            }
+        );
+
+        // ==============================================================
+        // CONFIGURACIÓN DE RELACIONES (Fluent API)
+        // ==============================================================
         modelBuilder.Entity<DetalleModel>()
             .HasOne(d => d.Orden)
             .WithMany(o => o.Detalles)
             .HasForeignKey(d => d.OrdenId)
-            .OnDelete(DeleteBehavior.Cascade); // Recomendado para que si borras una orden, se borren sus detalles
+            .OnDelete(DeleteBehavior.Cascade);
 
-        // 4. Relación Orden -> Pagos
         modelBuilder.Entity<PagosModel>()
             .HasOne(p => p.Orden)
             .WithMany(o => o.Pagos)
@@ -115,9 +192,6 @@ public class AppDbContext : DbContext
         base.OnModelCreating(modelBuilder);
     }
 
-    // ==============================================================
-    // EL MOTOR DE AUDITORÍA AUTOMÁTICA
-    // ==============================================================
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
         var entries = ChangeTracker
@@ -133,11 +207,9 @@ public class AppDbContext : DbContext
             if (entityEntry.State == EntityState.Added)
             {
                 auditable.FechaCreacion = DateTime.Now;
-                // Nota: El CreadoPorId debe venir lleno desde el Servicio antes de llegar aquí.
             }
             else
             {
-                // Si se está modificando, actualizamos la fecha y protegemos la fecha original de creación
                 auditable.FechaModificacion = DateTime.Now;
                 entityEntry.Property(nameof(Auditable.FechaCreacion)).IsModified = false;
                 entityEntry.Property(nameof(Auditable.CreadoPorId)).IsModified = false;

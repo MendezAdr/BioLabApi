@@ -12,6 +12,7 @@ public interface IOrdenesService
     Task<ListOperationResult<OrdenResponseDTO>> GetAllOrdenesByPacienteAsync(int idPaciente, int AdminId);
     Task<ListOperationResult<OrdenResponseDTO>> GetAllOrdenesEntreFechasAsync(DateTime inicio, DateTime fin, int AdminId);
     Task<ListOperationResult<OrdenResponseDTO>> GetAllOrdenesByEstadoAsync(OrdenesModel.EstadoPago estado, int AdminId);
+    Task<ListOperationResult<OrdenResponseDTO>> GetAllUnpaidOrdersAsync(int AdminId);
 
     // Operaciones de escritura
     Task<OperationResult> CreateOrdenAsync(OrdenCreateDTO orden, int usuarioId);
